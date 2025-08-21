@@ -1,0 +1,845 @@
+﻿@using Sphinx_cure_.BLL.ModelVM.Patient
+@model AddPatientVM
+@{
+    ViewData["Title"] = "Add New Patient - Sphinx Cure";
+}
+
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewData["Title"]</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3a5f 50%, #0d1b2a 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        /* Animated background particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0.7;
+        }
+
+            .particle:nth-child(odd) {
+                background: rgba(79, 172, 254, 0.15);
+            }
+
+            .particle:nth-child(even) {
+                background: rgba(67, 206, 162, 0.12);
+            }
+
+            .particle.floating-up {
+                transform: translateY(-20px) scale(1.1);
+                opacity: 1;
+            }
+
+            .particle.floating-down {
+                transform: translateY(20px) scale(0.9);
+                opacity: 0.4;
+            }
+
+        /* Glass morphism container */
+        .main-container {
+            position: relative;
+            z-index: 10;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border: 2px solid rgba(79, 172, 254, 0.2);
+            border-radius: 24px;
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(44, 90, 160, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(50px) scale(0.95);
+        }
+
+            .form-container.loaded {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            .form-container:hover {
+                transform: translateY(-8px) scale(1.01);
+                box-shadow: 0 35px 90px rgba(44, 90, 160, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+                border-color: rgba(79, 172, 254, 0.4);
+            }
+
+            .form-container::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #2c5aa0, #4facfe, #00f2fe, #43cea2, #185a9d);
+                transition: all 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .form-container:hover::before {
+                left: 0;
+            }
+
+            .form-container.pulse {
+                box-shadow: 0 0 0 0 rgba(79, 172, 254, 0.4);
+                transition: all 0.6s ease-out;
+            }
+
+                .form-container.pulse.active {
+                    box-shadow: 0 0 0 20px rgba(79, 172, 254, 0);
+                }
+
+        .form-title {
+            text-align: center;
+            color: #2c5aa0;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 40px;
+            position: relative;
+            text-shadow: 0 2px 4px rgba(44, 90, 160, 0.1);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(-30px);
+        }
+
+            .form-title.loaded {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+            .form-title:hover {
+                color: #185a9d;
+                transform: scale(1.05) translateY(-5px);
+                text-shadow: 0 4px 8px rgba(44, 90, 160, 0.2);
+            }
+
+            .form-title::after {
+                content: '';
+                position: absolute;
+                bottom: -10px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 0;
+                height: 4px;
+                background: linear-gradient(90deg, #4facfe, #00f2fe);
+                border-radius: 2px;
+                transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+            .form-title:hover::after {
+                width: 120px;
+            }
+
+        .form-group {
+            margin-bottom: 30px;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateX(-30px);
+        }
+
+            .form-group.loaded {
+                opacity: 1;
+                transform: translateX(0);
+            }
+
+            .form-group:hover {
+                transform: translateY(-3px) translateX(5px);
+            }
+
+            .form-group.focused {
+                transform: translateY(-5px) scale(1.02);
+            }
+
+        .form-label {
+            display: block;
+            color: #2c5aa0;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+            .form-label:hover {
+                color: #185a9d;
+                transform: translateX(8px);
+            }
+
+            .form-label::before {
+                content: '';
+                position: absolute;
+                left: -10px;
+                top: 50%;
+                width: 0;
+                height: 2px;
+                background: linear-gradient(90deg, #4facfe, #43cea2);
+                transition: all 0.4s ease;
+                transform: translateY(-50%);
+            }
+
+        .form-group:hover .form-label::before {
+            width: 6px;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px solid rgba(79, 172, 254, 0.3);
+            border-radius: 16px;
+            color: #2c5aa0;
+            font-size: 1rem;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+            .form-control::placeholder {
+                color: rgba(44, 90, 160, 0.6);
+                transition: all 0.3s ease;
+            }
+
+            .form-control:focus {
+                outline: none;
+                border-color: #4facfe;
+                background: rgba(255, 255, 255, 1);
+                box-shadow: 0 0 30px rgba(79, 172, 254, 0.4), 0 5px 20px rgba(79, 172, 254, 0.2);
+                transform: translateY(-2px) scale(1.01);
+            }
+
+                .form-control:focus::placeholder {
+                    transform: translateY(-2px);
+                    opacity: 0.8;
+                }
+
+            .form-control:hover {
+                border-color: #4facfe;
+                transform: scale(1.01);
+                box-shadow: 0 5px 15px rgba(79, 172, 254, 0.1);
+            }
+
+        /* Validation styling */
+        .text-danger {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            display: block;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 1;
+            transform: translateY(0);
+            font-weight: 500;
+        }
+
+        .input-validation-error {
+            border-color: #e74c3c !important;
+            box-shadow: 0 0 15px rgba(231, 76, 60, 0.3) !important;
+        }
+
+        /* File upload styling */
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.9);
+            border: 2px dashed rgba(79, 172, 254, 0.4);
+            transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+            .file-upload-wrapper:hover {
+                border-color: #4facfe;
+                background: rgba(79, 172, 254, 0.1);
+                transform: scale(1.02) translateY(-3px);
+                box-shadow: 0 15px 40px rgba(79, 172, 254, 0.25);
+                border-style: solid;
+            }
+
+            .file-upload-wrapper.drag-over {
+                border-color: #43cea2;
+                background: rgba(67, 206, 162, 0.15);
+                transform: scale(1.05);
+                box-shadow: 0 0 40px rgba(67, 206, 162, 0.3);
+            }
+
+            .file-upload-wrapper input[type="file"] {
+                position: absolute;
+                left: 0;
+                top: 0;
+                opacity: 0;
+                cursor: pointer;
+                width: 100%;
+                height: 100%;
+            }
+
+        .file-upload-content {
+            text-align: center;
+            color: #2c5aa0;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+            .file-upload-content i {
+                font-size: 3rem;
+                margin-bottom: 15px;
+                display: block;
+                transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+
+        .file-upload-wrapper:hover .file-upload-content i {
+            color: #4facfe;
+            transform: scale(1.2) translateY(-5px);
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-weight: 600;
+            color: #4facfe;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+            .file-name.show {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        /* Button styling */
+        .btn-container {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+            .btn-container.loaded {
+                opacity: 1;
+                transform: translateY(0);
+            }
+
+        .btn {
+            padding: 16px 32px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 120px;
+        }
+
+            .btn::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+                transition: all 0.6s ease;
+            }
+
+            .btn:hover::before {
+                left: 100%;
+            }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2c5aa0 0%, #4facfe 100%);
+            color: white;
+            box-shadow: 0 8px 25px rgba(44, 90, 160, 0.4);
+        }
+
+            .btn-primary:hover {
+                transform: translateY(-3px) scale(1.05);
+                box-shadow: 0 15px 35px rgba(44, 90, 160, 0.6);
+                background: linear-gradient(135deg, #4facfe 0%, #43cea2 100%);
+            }
+
+        .btn-secondary {
+            background: rgba(44, 90, 160, 0.1);
+            color: #2c5aa0;
+            border: 2px solid rgba(44, 90, 160, 0.3);
+        }
+
+            .btn-secondary:hover {
+                background: rgba(44, 90, 160, 0.2);
+                transform: translateY(-2px) scale(1.03);
+                border-color: #2c5aa0;
+                box-shadow: 0 10px 25px rgba(44, 90, 160, 0.2);
+            }
+
+        /* Loading spinner */
+        .spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid #4facfe;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            animation: spin 1s linear infinite;
+        }
+
+        
+
+        
+
+        /* Medical icons */
+        .medical-icon {
+            color: #4facfe;
+            margin-right: 10px;
+            font-size: 1.2rem;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+            .medical-icon:hover {
+                color: #2c5aa0;
+                transform: rotate(360deg) scale(1.1);
+            }
+
+        /* Alert messages */
+        .alert {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.5s ease;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #43cea2 0%, rgba(67, 206, 162, 0.1) 100%);
+            color: #155724;
+            border: 1px solid #43cea2;
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #e74c3c 0%, rgba(231, 76, 60, 0.1) 100%);
+            color: #721c24;
+            border: 1px solid #e74c3c;
+        }
+
+        /* Progress indicator */
+        .progress-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4facfe, #43cea2, #4facfe);
+            transition: all 0.3s ease;
+            border-radius: 0 0 3px 0;
+            opacity: 0;
+            width: 0%;
+        }
+
+            .progress-indicator.show {
+                opacity: 1;
+            }
+    </style>
+</head>
+<body>
+    <div class="particles"></div>
+
+    <div class="main-container">
+        <div class="form-container pulse" id="formContainer">
+            <div class="progress-indicator" id="progressIndicator"></div>
+
+            <h2 class="form-title" id="formTitle">
+                <i class="fas fa-user-plus medical-icon"></i>
+                Add New Patient
+            </h2>
+
+            <!-- Success Message -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle medical-icon"></i>
+                    @TempData["Success"]
+                </div>
+            }
+
+            <!-- Error Message with details -->
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger" style="max-height: 300px; overflow-y: auto;">
+                    <i class="fas fa-exclamation-triangle medical-icon"></i>
+                    <strong>Error Details:</strong><br>
+                    <div style="font-family: monospace; font-size: 0.9rem; margin-top: 10px; white-space: pre-wrap;">@ViewBag.Error</div>
+                    <button type="button" class="btn-close" style="float: right; background: none; border: none; color: #721c24; font-size: 1.2rem; margin-top: -30px;" onclick="this.parentElement.remove()">×</button>
+                </div>
+            }
+
+            <!-- Model State Errors -->
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle medical-icon"></i>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                        {
+                            <li>@error.ErrorMessage</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <form action="@Url.Action("Create", "Patient")" method="post" enctype="multipart/form-data" id="patientForm">
+                @Html.AntiForgeryToken()
+
+                <div class="form-group" id="nameGroup">
+                    <label for="Name" class="form-label">
+                        <i class="fas fa-user medical-icon"></i>
+                        Patient Name
+                    </label>
+                    <input type="text" name="Name" id="Name" value="@(Model?.Name ?? "")" class="form-control wave-effect" placeholder="Enter patient name..." required />
+                    @Html.ValidationMessageFor(m => m.Name, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="form-group" id="fileGroup">
+                    <label for="File" class="form-label">
+                        <i class="fas fa-file-medical medical-icon"></i>
+                        Upload Medical File (PDF or Word)
+                    </label>
+                    <div class="file-upload-wrapper wave-effect" id="fileUpload">
+                        <input type="file" name="File" id="fileInput" accept=".pdf,.doc,.docx" />
+                        <div class="file-upload-content">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                            <div>Drag file here or click to select</div>
+                            <div style="font-size: 0.9rem; margin-top: 8px; color: rgba(44, 90, 160, 0.6);">
+                                Accepted: PDF, DOC, DOCX
+                            </div>
+                            <div class="file-name" id="fileName"></div>
+                        </div>
+                    </div>
+                    @Html.ValidationMessageFor(m => m.File, "", new { @class = "text-danger" })
+                </div>
+
+                <div class="btn-container" id="btnContainer">
+                    <button type="submit" class="btn btn-primary wave-effect" id="submitBtn">
+                        <i class="fas fa-save"></i>
+                        Save Patient
+                    </button>
+                    <a href="@Url.Action("Index", "Patient")" class="btn btn-secondary wave-effect">
+                        <i class="fas fa-times"></i>
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Create animated particles
+        function createParticles() {
+            const particlesContainer = document.querySelector('.particles');
+            const particleCount = 60;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.top = Math.random() * 100 + '%';
+                particle.style.width = Math.random() * 5 + 3 + 'px';
+                particle.style.height = particle.style.width;
+                particlesContainer.appendChild(particle);
+
+                setInterval(() => {
+                    if (Math.random() > 0.5) {
+                        particle.classList.toggle('floating-up');
+                        particle.classList.remove('floating-down');
+                    } else {
+                        particle.classList.toggle('floating-down');
+                        particle.classList.remove('floating-up');
+                    }
+                }, Math.random() * 4000 + 2000);
+            }
+        }
+
+        // Page load animation sequence
+        function initializeAnimations() {
+            const formContainer = document.getElementById('formContainer');
+            const formTitle = document.getElementById('formTitle');
+            const nameGroup = document.getElementById('nameGroup');
+            const fileGroup = document.getElementById('fileGroup');
+            const btnContainer = document.getElementById('btnContainer');
+
+            setTimeout(() => {
+                formContainer.classList.add('active');
+                setTimeout(() => formContainer.classList.remove('active'), 600);
+            }, 300);
+
+            setTimeout(() => formContainer.classList.add('loaded'), 100);
+            setTimeout(() => formTitle.classList.add('loaded'), 300);
+            setTimeout(() => nameGroup.classList.add('loaded'), 500);
+            setTimeout(() => fileGroup.classList.add('loaded'), 700);
+            setTimeout(() => btnContainer.classList.add('loaded'), 900);
+        }
+
+        // File upload handling with validation
+        const fileInput = document.getElementById('fileInput');
+        const fileName = document.getElementById('fileName');
+        const fileUpload = document.getElementById('fileUpload');
+
+        fileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                // Validate file type
+                const allowedTypes = ['.pdf', '.doc', '.docx'];
+                const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+
+                if (!allowedTypes.includes(fileExtension)) {
+                    alert('File type not allowed. Only PDF, DOC, and DOCX files are allowed.');
+                    this.value = '';
+                    return;
+                }
+
+                // Validate file size (10MB = 10 * 1024 * 1024 bytes)
+                if (file.size > 10 * 1024 * 1024) {
+                    alert('File size cannot exceed 10MB.');
+                    this.value = '';
+                    return;
+                }
+
+                fileName.textContent = file.name;
+                fileName.classList.add('show');
+                fileUpload.style.borderColor = '#43cea2';
+                fileUpload.style.background = 'rgba(67, 206, 162, 0.15)';
+            } else {
+                fileName.classList.remove('show');
+                fileUpload.style.borderColor = 'rgba(79, 172, 254, 0.4)';
+                fileUpload.style.background = 'rgba(255, 255, 255, 0.9)';
+            }
+        });
+
+        // Drag and drop
+        fileUpload.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            fileUpload.classList.add('drag-over');
+        });
+
+        fileUpload.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            fileUpload.classList.remove('drag-over');
+        });
+
+        fileUpload.addEventListener('drop', function(e) {
+            e.preventDefault();
+            fileUpload.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                fileName.textContent = files[0].name;
+                fileName.classList.add('show');
+                fileUpload.style.borderColor = '#43cea2';
+                fileUpload.style.background = 'rgba(67, 206, 162, 0.15)';
+            }
+        });
+
+        // Form submission with loading animation
+        const form = document.getElementById('patientForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const progressIndicator = document.getElementById('progressIndicator');
+
+        form.addEventListener('submit', function(e) {
+            // Validation before submit
+            const nameInput = document.getElementById('Name');
+            const fileInput = document.getElementById('fileInput');
+
+            let hasError = false;
+
+            // Clear previous errors
+            document.querySelectorAll('.text-danger').forEach(error => {
+                if (!error.getAttribute('data-valmsg-for')) {
+                    error.textContent = '';
+                    error.style.display = 'none';
+                }
+            });
+
+            // Validate name
+            if (!nameInput.value.trim()) {
+                showClientError('Name is required', nameInput);
+                hasError = true;
+            }
+
+            // Validate file
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showClientError('Medical file is required', fileInput);
+                hasError = true;
+            } else {
+                const file = fileInput.files[0];
+                const allowedTypes = ['.pdf', '.doc', '.docx'];
+                const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+
+                if (!allowedTypes.includes(fileExtension)) {
+                    showClientError('Only PDF, DOC, and DOCX files are allowed', fileInput);
+                    hasError = true;
+                }
+
+                if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                    showClientError('File size must be less than 10MB', fileInput);
+                    hasError = true;
+                }
+            }
+
+            if (hasError) {
+                e.preventDefault();
+                return false;
+            }
+
+            // Show loading animation
+            progressIndicator.classList.add('show');
+            submitBtn.innerHTML = '<div class="spinner"></div> Saving...';
+            submitBtn.disabled = true;
+
+            // Animate progress bar
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15 + 5;
+                if (progress > 90) progress = 90;
+                progressIndicator.style.width = progress + '%';
+            }, 100);
+
+            // Clear interval when form is actually submitted
+            setTimeout(() => {
+                clearInterval(progressInterval);
+                progressIndicator.style.width = '100%';
+            }, 1000);
+        });
+
+        function showClientError(message, input) {
+            const errorSpan = document.createElement('span');
+            errorSpan.className = 'text-danger';
+            errorSpan.textContent = message;
+            errorSpan.style.display = 'block';
+
+            const existingError = input.parentElement.querySelector('.text-danger:not([data-valmsg-for])');
+            if (existingError) {
+                existingError.remove();
+            }
+
+            input.parentElement.appendChild(errorSpan);
+            input.classList.add('input-validation-error');
+        }
+
+        // Input field enhancements
+        const inputs = document.querySelectorAll('.form-control');
+        inputs.forEach(input => {
+            input.addEventListener('focus', function() {
+                this.parentElement.classList.add('focused');
+            });
+
+            input.addEventListener('blur', function() {
+                this.parentElement.classList.remove('focused');
+            });
+        });
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            initializeAnimations();
+
+            // Auto-hide success/error messages after 5 seconds
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(alert => {
+                setTimeout(() => {
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-20px)';
+                    setTimeout(() => alert.remove(), 500);
+                }, 5000);
+            });
+        });
+
+        // Mouse interaction with particles
+        document.addEventListener('mousemove', function(e) {
+            const particles = document.querySelectorAll('.particle');
+            const mouseX = e.clientX;
+            const mouseY = e.clientY;
+
+            particles.forEach((particle, index) => {
+                if (index % 3 === 0) {
+                    const rect = particle.getBoundingClientRect();
+                    const particleX = rect.left + rect.width / 2;
+                    const particleY = rect.top + rect.height / 2;
+
+                    const distance = Math.sqrt((mouseX - particleX) ** 2 + (mouseY - particleY) ** 2);
+
+                    if (distance < 150) {
+                        const force = (150 - distance) / 150;
+                        const deltaX = (mouseX - particleX) * force * 0.2;
+                        const deltaY = (mouseY - particleY) * force * 0.2;
+
+                        particle.style.transform = `translate(${deltaX}px, ${deltaY}px) scale(${1 + force * 0.3})`;
+                        particle.style.opacity = Math.min(1, 0.7 + force * 0.3);
+                    } else {
+                        particle.style.transform = 'translate(0, 0) scale(1)';
+                        particle.style.opacity = '0.7';
+                    }
+                }
+            });
+        });
+
+        // Dynamic background changes
+        let colorIndex = 0;
+        const colors = [
+            'linear-gradient(135deg, #2c5aa0 0%, #1e3a5f 50%, #0d1b2a 100%)',
+            'linear-gradient(135deg, #1e3a5f 0%, #2c5aa0 50%, #4facfe 100%)',
+            'linear-gradient(135deg, #0d1b2a 0%, #2c5aa0 50%, #43cea2 100%)'
+        ];
+
+        setInterval(() => {
+            colorIndex = (colorIndex + 1) % colors.length;
+            document.body.style.background = colors[colorIndex];
+        }, 8000);
+    </script>
+</body>
+</html>
