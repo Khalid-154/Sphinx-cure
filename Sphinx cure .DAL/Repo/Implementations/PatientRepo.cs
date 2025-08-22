@@ -37,26 +37,15 @@ namespace Sphinx_cure_.DAL.Repo.Implementations
 
         public async Task UpdateAsync(Patient patient)
         {
-            var existing = await _context.Patients
-                                         .Where(p => p.Id == patient.Id)
-                                         .FirstOrDefaultAsync();
-            //if (existing != null)
-            //{
-            //    existing.Name = patient.Name;
-            //    existing.FilePath = patient.FilePath;
-            //    _context.Patients.Update(existing);
-            //}
+            _context.Patients.Update(patient);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int id)
+        public async Task DeleteAsync(Patient patient)
         {
-            var patient = await _context.Patients
-                                        .Where(p => p.Id == id)
-                                        .FirstOrDefaultAsync();
-            if (patient != null)
-            {
-                _context.Patients.Remove(patient);
-            }
+            patient.Delete();
+            _context.Patients.Update(patient);
+            await _context.SaveChangesAsync();
         }
         public async Task SaveAsync()
         {

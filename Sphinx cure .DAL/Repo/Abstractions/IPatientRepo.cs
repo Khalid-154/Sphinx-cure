@@ -1,5 +1,4 @@
 ﻿
-
 using Sphinx_cure_.DAL.Entities;
 
 namespace Sphinx_cure_.DAL.Repo.Abstractions
@@ -10,7 +9,7 @@ namespace Sphinx_cure_.DAL.Repo.Abstractions
         Task<Patient?> GetByIdAsync(int id);
         Task AddAsync(Patient patient);
         Task UpdateAsync(Patient patient);
-        Task DeleteAsync(int id);
+        Task DeleteAsync(Patient patient);
         Task SaveAsync();
         Task<IEnumerable<Patient>> SearchByNameAsync(string name);
     }

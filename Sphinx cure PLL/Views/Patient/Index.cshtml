@@ -21,10 +21,16 @@
     <div class="alert alert-danger">@TempData["Error"]</div>
 }
 
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success">@TempData["Success"]</div>
+}
+
 <table class="table table-striped">
     <thead>
         <tr>
             <th>Name</th>
+            <th>File</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -33,13 +39,44 @@
         {
             <tr>
                 <td>@patient.Name</td>
-                <td>@patient.FilePath</td>
+                <td>
+                    @if (!string.IsNullOrEmpty(patient.FilePath))
+                    {
+                        <a class="btn btn-secondary btn-sm"
+                           asp-action="ViewFile"
+                           asp-route-id="@patient.Id"
+                           target="_blank">
+                            View
+                        </a>
+                    }
+                </td>
                 <td>
                     <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@patient.Id">Details</a>
-                    <a class="btn btn-warning btn-sm" asp-action="Edit" asp-route-id="@patient.Id">Edit</a>
-                    <a class="btn btn-danger btn-sm" asp-action="Delete" asp-route-id="@patient.Id">Delete</a>
+                    <a class="btn btn-warning btn-sm" asp-action="UpdateFile" asp-route-id="@patient.Id">Edit</a>
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(@patient.Id, '@patient.Name')">Delete</button>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        function confirmDelete(id, name) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You are about to delete patient: " + name,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: 'Yes, delete it!'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '/Patient/Delete/' + id;
+                }
+            });
+        }
+    </script>
+}

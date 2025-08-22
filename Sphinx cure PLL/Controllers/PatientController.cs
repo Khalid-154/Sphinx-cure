@@ -15,7 +15,7 @@ namespace Sphinx_cure_PLL.Controllers
             _patientService = patientService;
         }
 
-        // GET: /Patients
+        [HttpGet]
         public async Task<IActionResult> Index()
         {
             var (status, message, patients) = await _patientService.GetAllPatientsAsync();
@@ -35,14 +35,14 @@ namespace Sphinx_cure_PLL.Controllers
             return View(patient);
         }
 
-        // GET: /Patients/Create
+        
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        // POST: /Patients/Create
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AddPatientVM model, IFormFile file)
@@ -61,51 +61,55 @@ namespace Sphinx_cure_PLL.Controllers
             TempData["Success"] = message;
             return RedirectToAction(nameof(Index));
         }
-        
 
 
-        // GET: /Patients/Edit/5
-        //public async Task<IActionResult> Edit(int id)
-        //{
-        //    var (status, message, patient) = await _patientService.GetPatientByIdAsync(id);
-        //    if (!status) return RedirectToAction(nameof(Index));
 
-        //    var editModel = new PatientDTO
-        //    {
-        //        Id = patient.Id,
-        //        Name = patient.Name,
-        //        FilePath = patient.FilePath
-        //    };
+        [HttpGet]
+        public async Task<IActionResult> UpdateFile(int id)
+        {
+            var (status, message, patient) = await _patientService.GetPatientByIdAsync(id);
+            if (!status || patient == null)
+                return RedirectToAction(nameof(Index));
 
-        //    return View(editModel);
-        //}
+            ViewBag.PatientId = id;
+            ViewBag.PatientName = patient.Name;
 
-        //// POST: /Patients/Edit/5
-        //[HttpPost]
-        //[ValidateAntiForgeryToken]
-        //public async Task<IActionResult> Edit(int id, PatientDTO model)
-        //{
-        //    if (id != model.Id) return BadRequest();
+            return View(new UpdatePatientFileVM());
+        }
 
-        //    if (!ModelState.IsValid) return View(model);
 
-        //    var (status, message) = await _patientService.UpdatePatientAsync(model);
-        //    if (!status)
-        //    {
-        //        ModelState.AddModelError("", message);
-        //        return View(model);
-        //    }
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateFile(int id, UpdatePatientFileVM model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
 
-        //    return RedirectToAction(nameof(Index));
-        //}
+            var (status, message) = await _patientService.UpdatePatientAsync(id, model);
 
-        // GET: /Patients/Delete/5
+            if (!status)
+            {
+                ViewBag.Error = message;
+                return View(model);
+            }
+
+            TempData["Success"] = message;
+            return RedirectToAction(nameof(Details), new { id });
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Delete(int id)
         {
             var (status, message) = await _patientService.DeletePatientAsync(id);
-            if (!status) TempData["Error"] = message;
+
+            if (!status)
+                TempData["Error"] = message;
+            else
+                TempData["Success"] = message;
+
             return RedirectToAction(nameof(Index));
         }
+
 
         // GET: /Patients/Search?name=Ali
         //public async Task<IActionResult> Search(string name)
@@ -161,7 +165,6 @@ namespace Sphinx_cure_PLL.Controllers
             }
             memory.Position = 0;
 
-            // تحديد نوع الملف حسب الامتداد
             var ext = Path.GetExtension(filePath).ToLower();
             string contentType = ext switch
             {

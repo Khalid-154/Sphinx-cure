@@ -55,35 +55,46 @@ namespace Sphinx_cure_.BLL.Services.Implementations
             }
         }
 
-        
 
+        public async Task<(bool status, string message)> UpdatePatientAsync(int patientId, UpdatePatientFileVM model)
+        {
+            try
+            {
+                var patient = await _patientRepo.GetByIdAsync(patientId);
+                if (patient == null)
+                    return (false, "Patient not found");
 
-        //public async Task<(bool status, string message)> UpdatePatientAsync(PatientDTO patientDto)
-        //{
-        //    try
-        //    {
-        //        var patient = _mapper.Map<Patient>(patientDto);
-        //        await _patientRepo.UpdateAsync(patient);
-        //        await _patientRepo.SaveAsync();
-        //        return (true, "Patient updated successfully");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return (false, $"Error: {ex.Message}");
-        //    }
-        //}
+                if (model.File == null || model.File.Length == 0)
+                    return (false, "No file uploaded");
+
+                string filePath = Upload.UploadFile("Files", model.File);
+
+                patient.UpdateFile(filePath);
+                await _patientRepo.UpdateAsync(patient);
+                await _patientRepo.SaveAsync();
+                return (true, "Patient updated successfully");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error updating patient: {ex.Message}");
+            }
+        }
 
         public async Task<(bool status, string message)> DeletePatientAsync(int id)
         {
             try
             {
-                await _patientRepo.DeleteAsync(id);
-                await _patientRepo.SaveAsync();
+               var patient = await _patientRepo.GetByIdAsync(id);
+                if (patient == null)
+                    return (false, "Patient not found");
+
+                patient.Delete();
+                await _patientRepo.DeleteAsync(patient);
                 return (true, "Patient deleted successfully");
             }
             catch (Exception ex)
             {
-                return (false, $"Error: {ex.Message}");
+                return (false, $"Error deleting patient: {ex.Message}");
             }
         }
 

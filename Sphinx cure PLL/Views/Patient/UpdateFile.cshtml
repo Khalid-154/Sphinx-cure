@@ -1,0 +1,23 @@
+﻿@model Sphinx_cure_.BLL.ModelVM.Patient.UpdatePatientFileVM
+
+<h2>Update File for @ViewBag.PatientName</h2> 
+
+<form asp-action="UpdateFile" asp-route-id="@ViewBag.PatientId" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="File">Upload New File</label>
+        <input asp-for="File" type="file" class="form-control" />
+        <span asp-validation-for="File" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary mt-2">Update</button>
+</form>
+
+@if (ViewBag.Error != null)
+{
+    <div class="alert alert-danger mt-2">@ViewBag.Error</div>
+}
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success mt-2">@TempData["Success"]</div>
+}

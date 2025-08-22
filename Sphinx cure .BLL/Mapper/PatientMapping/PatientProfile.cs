@@ -9,13 +9,15 @@ using System.Threading.Tasks;
 
 namespace Sphinx_cure_.BLL.Mapper.PatientMapping
 {
-    // PatientProfile should inherit from AutoMapper.Profile
     public class PatientProfile : Profile
     {
         public PatientProfile()
         {
             CreateMap<Patient, PatientDTO>().ReverseMap();
             CreateMap<AddPatientVM, Patient>();
+
+            CreateMap<UpdatePatientFileVM, Patient>()
+            .ForMember(dest => dest.FilePath, opt => opt.Ignore());
         }
     }
 }
