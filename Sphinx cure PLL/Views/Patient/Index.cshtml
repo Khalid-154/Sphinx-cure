@@ -1,5 +1,4 @@
-﻿@using Sphinx_cure_.BLL.ModelVM.Patient
-@model List<PatientDTO>
+﻿@model List<Sphinx_cure_.BLL.ModelVM.Patient.PatientDTO>
 
 @{
     ViewData["Title"] = "Patients";
@@ -16,6 +15,11 @@
     <button type="submit" class="btn btn-info">Search</button>
 </form>
 
+<form id="antiForgeryForm">
+    @Html.AntiForgeryToken()
+</form>
+
+
 @if (TempData["Error"] != null)
 {
     <div class="alert alert-danger">@TempData["Error"]</div>
@@ -26,7 +30,7 @@
     <div class="alert alert-success">@TempData["Success"]</div>
 }
 
-<table class="table table-striped">
+<table class="table table-striped" id="patientTable">
     <thead>
         <tr>
             <th>Name</th>
@@ -35,35 +39,22 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var patient in Model)
-        {
-            <tr>
-                <td>@patient.Name</td>
-                <td>
-                    @if (!string.IsNullOrEmpty(patient.FilePath))
-                    {
-                        <a class="btn btn-secondary btn-sm"
-                           asp-action="ViewFile"
-                           asp-route-id="@patient.Id"
-                           target="_blank">
-                            View
-                        </a>
-                    }
-                </td>
-                <td>
-                    <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@patient.Id">Details</a>
-                    <a class="btn btn-warning btn-sm" asp-action="UpdateFile" asp-route-id="@patient.Id">Edit</a>
-                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete(@patient.Id, '@patient.Name')">Delete</button>
-                </td>
-            </tr>
-        }
+        @await Html.PartialAsync("_PatientTable", Model)
     </tbody>
 </table>
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
     <script>
-        function confirmDelete(id, name) {
+        function refreshPatientTable() {
+            $.get('@Url.Action("GetPatientTable")', function(html) {
+                $("#patientTable tbody").html(html);
+            });
+        }
+
+                function deletePatient(id, name) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You are about to delete patient: " + name,
@@ -74,9 +65,26 @@
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => {
                 if (result.isConfirmed) {
-                    window.location.href = '/Patient/Delete/' + id;
+                    $.ajax({
+                        url: '/Patient/Delete/' + id,
+                        type: 'POST',
+                        data: {
+                            __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        success: function(msg) {
+                            Swal.fire('Deleted!', msg, 'success');
+                            refreshPatientTable();
+                        },
+                        error: function(xhr) {
+                            Swal.fire('Error', xhr.responseText || 'Delete failed', 'error');
+                        }
+                    });
                 }
             });
         }
+
+
+        // تحديث الجدول كل 3 ثواني
+        setInterval(refreshPatientTable, 3000);
     </script>
 }

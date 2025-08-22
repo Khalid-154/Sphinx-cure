@@ -97,17 +97,16 @@ namespace Sphinx_cure_PLL.Controllers
             return RedirectToAction(nameof(Details), new { id });
         }
 
-        [HttpGet]
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
             var (status, message) = await _patientService.DeletePatientAsync(id);
 
             if (!status)
-                TempData["Error"] = message;
-            else
-                TempData["Success"] = message;
+                return StatusCode(500, message); // ترجع خطأ للـ AJAX
 
-            return RedirectToAction(nameof(Index));
+            return Ok(message); // ترجع رسالة نجاح للـ AJAX
         }
 
 
@@ -174,8 +173,21 @@ namespace Sphinx_cure_PLL.Controllers
                 _ => "application/octet-stream"
             };
 
-            return File(memory, contentType); // بدون اسم ملف = المتصفح يحاول عرضه مباشرة
+            return File(memory, contentType); 
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPatientTable()
+        {
+            var (status, message, patients) = await _patientService.GetAllPatientsAsync();
+            if (!status)
+                return PartialView("_PatientTable", new List<PatientDTO>());
+
+            return PartialView("_PatientTable", patients);
+        }
+
+
+
 
     }
 }

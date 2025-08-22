@@ -1,0 +1,22 @@
+﻿@model List<Sphinx_cure_.BLL.ModelVM.Patient.PatientDTO>
+
+@foreach (var patient in Model)
+{
+    <tr>
+        <td>@patient.Name</td>
+        <td>
+            @if (!string.IsNullOrEmpty(patient.FilePath))
+            {
+                <a class="btn btn-secondary btn-sm"
+                   asp-action="ViewFile"
+                   asp-route-id="@patient.Id"
+                   target="_blank">View</a>
+            }
+        </td>
+        <td>
+            <a class="btn btn-info btn-sm" asp-action="Details" asp-route-id="@patient.Id">Details</a>
+            <a class="btn btn-warning btn-sm" asp-action="UpdateFile" asp-route-id="@patient.Id">Edit</a>
+            <button type="button" class="btn btn-danger btn-sm" onclick="deletePatient(@patient.Id, '@patient.Name')">Delete</button>
+        </td>
+    </tr>
+}

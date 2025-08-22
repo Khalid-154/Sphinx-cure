@@ -30,7 +30,9 @@ namespace Sphinx_cure_PLL
             builder.Services.AddScoped<IPatientRepo, PatientRepo>();
             builder.Services.AddScoped<IPatientService, PatientService>();
 
+
             var app = builder.Build();
+
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())

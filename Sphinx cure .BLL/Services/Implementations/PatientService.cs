@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.AspNet.SignalR;
 using Microsoft.AspNetCore.Http;
 using Sphinx_cure_.BLL.Helper;
 using Sphinx_cure_.BLL.ModelVM.Patient;
