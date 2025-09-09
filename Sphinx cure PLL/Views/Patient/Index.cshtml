@@ -10,15 +10,15 @@
     <a class="btn btn-primary" asp-action="Create">Add New Patient</a>
 </p>
 
-<form asp-action="Search" method="get" class="form-inline mb-3">
-    <input type="text" name="name" class="form-control mr-2" placeholder="Search by name" />
-    <button type="submit" class="btn btn-info">Search</button>
-</form>
+<!-- مربع البحث -->
+<input type="text" id="searchBox" class="form-control mb-3" placeholder="Search by name" autocomplete="off" />
+
+<!-- هنا هنعرض الاقتراحات -->
+<ul id="suggestions" class="list-group" style="position:absolute; z-index:1000; width:300px;"></ul>
 
 <form id="antiForgeryForm">
     @Html.AntiForgeryToken()
 </form>
-
 
 @if (TempData["Error"] != null)
 {
@@ -48,13 +48,15 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
     <script>
+        // تحديث الجدول كل 3 ثواني
         function refreshPatientTable() {
-            $.get('@Url.Action("GetPatientTable")', function(html) {
+            $.get('@Url.Action("GetPatientTable")', function (html) {
                 $("#patientTable tbody").html(html);
             });
         }
 
-                function deletePatient(id, name) {
+        // الحذف
+        function deletePatient(id, name) {
             Swal.fire({
                 title: 'Are you sure?',
                 text: "You are about to delete patient: " + name,
@@ -71,11 +73,11 @@
                         data: {
                             __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                         },
-                        success: function(msg) {
+                        success: function (msg) {
                             Swal.fire('Deleted!', msg, 'success');
                             refreshPatientTable();
                         },
-                        error: function(xhr) {
+                        error: function (xhr) {
                             Swal.fire('Error', xhr.responseText || 'Delete failed', 'error');
                         }
                     });
@@ -83,6 +85,47 @@
             });
         }
 
+        $(document).ready(function () {
+            // البحث اللحظي و إظهار أسماء تحت الـ input
+            $("#searchBox").on("keyup", function () {
+                var query = $(this).val().trim();
+
+                if (query.length === 0) {
+                    $("#suggestions").empty();
+                    refreshPatientTable(); // يرجع الجدول كامل لما البحث يفضى
+                    return;
+                }
+
+                $.ajax({
+                    url: '@Url.Action("SearchNames", "Patient")',
+                    type: 'GET',
+                    data: { term: query },
+                    success: function (data) {
+                        $("#suggestions").empty();
+
+                        if (data.length > 0) {
+                            $.each(data, function (i, name) {
+                                $("#suggestions").append(
+                                    "<li class='list-group-item suggestion-item' style='cursor:pointer'>" + name + "</li>"
+                                );
+                            });
+                        }
+                    }
+                });
+            });
+
+            // لما المستخدم يختار اسم من الليست
+            $(document).on("click", ".suggestion-item", function () {
+                var selectedName = $(this).text();
+                $("#searchBox").val(selectedName);
+                $("#suggestions").empty();
+
+                // هنا نجيب الجدول بقى بالاسم المختار
+                $.get('@Url.Action("Search", "Patient")', { name: selectedName }, function (html) {
+                    $("#patientTable tbody").html(html);
+                });
+            });
+        });
 
         // تحديث الجدول كل 3 ثواني
         setInterval(refreshPatientTable, 3000);

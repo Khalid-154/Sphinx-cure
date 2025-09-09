@@ -127,18 +127,23 @@ namespace Sphinx_cure_.BLL.Services.Implementations
         }
 
 
-        //public async Task<(bool status, string message, List<PatientDTO> patients)> SearchPatientsByNameAsync(string name)
-        //{
-        //    try
-        //    {
-        //        var patients = await _patientRepo.SearchByNameAsync(name);
-        //        var patientDtos = _mapper.Map<List<PatientDTO>>(patients);
-        //        return (true, "Search completed successfully", patientDtos);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return (false, $"Error: {ex.Message}", new List<PatientDTO>());
-        //    }
-        //}
+        public async Task<(bool status, string message, List<PatientDTO> patients)> SearchPatientsByNameAsync(string name)
+        {
+            try
+            {
+                var patients = await _patientRepo.SearchByNameAsync(name);
+
+                if (patients == null || !patients.Any())
+                    return (false, "No patients found", new List<PatientDTO>());
+
+                var patientDtos = _mapper.Map<List<PatientDTO>>(patients);
+                return (true, "Patients retrieved successfully", patientDtos);
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Error searching patients: {ex.Message}", new List<PatientDTO>());
+            }
+        }
+
     }
 }

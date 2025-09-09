@@ -11,6 +11,6 @@ namespace Sphinx_cure_.DAL.Repo.Abstractions
         Task UpdateAsync(Patient patient);
         Task DeleteAsync(Patient patient);
         Task SaveAsync();
-        Task<IEnumerable<Patient>> SearchByNameAsync(string name);
+        Task<List<Patient>> SearchByNameAsync(string name);
     }
 }

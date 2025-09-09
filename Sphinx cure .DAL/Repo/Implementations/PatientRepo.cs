@@ -52,7 +52,7 @@ namespace Sphinx_cure_.DAL.Repo.Implementations
             await _context.SaveChangesAsync();
         }
 
-        public async Task<IEnumerable<Patient>> SearchByNameAsync(string name)
+        public async Task<List<Patient>> SearchByNameAsync(string name)
         {
             return await _context.Patients
                                  .Where(p => !p.IsDeleted && p.Name.Contains(name))

@@ -1,23 +1,513 @@
 ﻿@model Sphinx_cure_.BLL.ModelVM.Patient.UpdatePatientFileVM
 
-<h2>Update File for @ViewBag.PatientName</h2> 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Patient File</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-<form asp-action="UpdateFile" asp-route-id="@ViewBag.PatientId" method="post" enctype="multipart/form-data">
-    <div class="form-group">
-        <label for="File">Upload New File</label>
-        <input asp-for="File" type="file" class="form-control" />
-        <span asp-validation-for="File" class="text-danger"></span>
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            position: relative;
+            overflow: hidden;
+            margin: 0;
+        }
+
+            body::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Ccircle cx='30' cy='30' r='2'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 25px;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(255, 255, 255, 0.3);
+            padding: 35px;
+            width: 90%;
+            max-width: 480px;
+            position: relative;
+            z-index: 10;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+            .header::before {
+                content: '';
+                position: absolute;
+                top: -15px;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 60px;
+                height: 3px;
+                background: linear-gradient(90deg, #667eea, #764ba2);
+                border-radius: 2px;
+            }
+
+            .header h2 {
+                color: #2c3e50;
+                font-size: 2rem;
+                font-weight: 800;
+                margin-bottom: 8px;
+                letter-spacing: -0.5px;
+                background: linear-gradient(135deg, #667eea, #764ba2);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                line-height: 1.2;
+            }
+
+        .patient-name {
+            color: #7f8c8d;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .form-container {
+            position: relative;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+            .form-group label {
+                display: block;
+                color: #34495e;
+                font-weight: 600;
+                margin-bottom: 10px;
+                font-size: 1rem;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            }
+
+                .form-group label i {
+                    color: #667eea;
+                    font-size: 1.1rem;
+                }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+            cursor: pointer;
+            border: 2px dashed #bdc3c7;
+            border-radius: 15px;
+            padding: 30px 15px;
+            text-align: center;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            position: relative;
+        }
+
+            .file-input-wrapper::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: linear-gradient(45deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+                opacity: 0;
+                transition: opacity 0.3s ease;
+                border-radius: 17px;
+            }
+
+            .file-input-wrapper:hover::before {
+                opacity: 1;
+            }
+
+            .file-input-wrapper:hover {
+                border-color: #667eea;
+                transform: translateY(-5px);
+                box-shadow: 0 15px 35px rgba(102, 126, 234, 0.2);
+            }
+
+            .file-input-wrapper.drag-over {
+                border-color: #27ae60;
+                background: linear-gradient(135deg, rgba(39, 174, 96, 0.1), rgba(46, 204, 113, 0.1));
+                transform: scale(1.02);
+            }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+            opacity: 0;
+        }
+
+        .file-input-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .file-icon {
+            font-size: 2.5rem;
+            color: #667eea;
+            opacity: 0.7;
+            transition: all 0.3s ease;
+        }
+
+        .file-input-wrapper:hover .file-icon {
+            transform: scale(1.1);
+            opacity: 1;
+        }
+
+        .file-text {
+            font-size: 1rem;
+            color: #555;
+            font-weight: 600;
+        }
+
+        .file-subtext {
+            font-size: 0.85rem;
+            color: #777;
+            opacity: 0.8;
+        }
+
+        .selected-file {
+            margin-top: 15px;
+            padding: 15px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 8px 20px rgba(46, 204, 113, 0.3);
+        }
+
+            .selected-file i {
+                font-size: 1.5rem;
+            }
+
+        .selected-file-info {
+            flex: 1;
+        }
+
+        .selected-file-name {
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 3px;
+        }
+
+        .selected-file-size {
+            font-size: 0.85rem;
+            opacity: 0.9;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 15px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+            .btn-submit::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+                transition: left 0.5s;
+            }
+
+            .btn-submit:hover::before {
+                left: 100%;
+            }
+
+            .btn-submit:hover {
+                transform: translateY(-3px);
+                box-shadow: 0 15px 35px rgba(102, 126, 234, 0.4);
+            }
+
+            .btn-submit:active {
+                transform: translateY(-1px);
+            }
+
+        .alert {
+            padding: 15px 20px;
+            border-radius: 12px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-danger {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+
+        .alert-success {
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            color: white;
+        }
+
+        .alert i {
+            font-size: 1.3rem;
+        }
+
+        .validation-error {
+            color: #e74c3c;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h2>Update File for @ViewBag.PatientName</h2>
+            <div class="patient-name">Patient ID: @ViewBag.PatientId</div>
+        </div>
+
+        <div class="form-container">
+            <form asp-action="UpdateFile" asp-route-id="@ViewBag.PatientId" method="post" enctype="multipart/form-data" id="updateForm">
+                <div class="form-group">
+                    <label for="file">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        Upload New File
+                    </label>
+
+                    <div class="file-input-wrapper" id="fileWrapper">
+                        <input asp-for="File" type="file" id="file" class="file-input" accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.txt">
+                        <div class="file-input-content">
+                            <i class="fas fa-cloud-upload-alt file-icon"></i>
+                            <div class="file-text">Choose file or drag & drop</div>
+                            <div class="file-subtext">Supports PDF, DOC, Images (Max 10MB)</div>
+                        </div>
+                    </div>
+
+                    <div class="selected-file" id="selectedFile">
+                        <i class="fas fa-file-alt"></i>
+                        <div class="selected-file-info">
+                            <div class="selected-file-name" id="fileName"></div>
+                            <div class="selected-file-size" id="fileSize"></div>
+                        </div>
+                        <i class="fas fa-check-circle" style="color: #27ae60;"></i>
+                    </div>
+
+                    <div class="validation-error" id="fileError" style="display: none;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span asp-validation-for="File" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-submit">
+                    <i class="fas fa-sync-alt" style="margin-right: 10px;"></i>
+                    Update File
+                </button>
+            </form>
+
+            <!-- Backend Error Messages -->
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>@ViewBag.Error</span>
+                </div>
+            }
+
+            <!-- Backend Success Messages -->
+            @if (TempData["Success"] != null)
+            {
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span>@TempData["Success"]</span>
+                </div>
+            }
+
+            <!-- Demo alerts for client-side -->
+            <div class="alert alert-success" style="display: none;" id="successAlert">
+                <i class="fas fa-check-circle"></i>
+                <span>File updated successfully!</span>
+            </div>
+
+            <div class="alert alert-danger" style="display: none;" id="errorAlert">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span>Error updating file. Please try again.</span>
+            </div>
+        </div>
     </div>
 
-    <button type="submit" class="btn btn-primary mt-2">Update</button>
-</form>
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+    </div>
 
-@if (ViewBag.Error != null)
-{
-    <div class="alert alert-danger mt-2">@ViewBag.Error</div>
-}
+    <script>
+        const fileInput = document.getElementById('file');
+        const fileWrapper = document.getElementById('fileWrapper');
+        const selectedFile = document.getElementById('selectedFile');
+        const fileName = document.getElementById('fileName');
+        const fileSize = document.getElementById('fileSize');
+        const fileError = document.getElementById('fileError');
+        const form = document.getElementById('updateForm');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+        const successAlert = document.getElementById('successAlert');
+        const errorAlert = document.getElementById('errorAlert');
 
-@if (TempData["Success"] != null)
-{
-    <div class="alert alert-success mt-2">@TempData["Success"]</div>
-}
+        // File input handling
+        fileInput.addEventListener('change', handleFileSelect);
+        fileWrapper.addEventListener('click', () => fileInput.click());
+
+        // Drag and drop functionality
+        fileWrapper.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            fileWrapper.classList.add('drag-over');
+        });
+
+        fileWrapper.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            fileWrapper.classList.remove('drag-over');
+        });
+
+        fileWrapper.addEventListener('drop', (e) => {
+            e.preventDefault();
+            fileWrapper.classList.remove('drag-over');
+
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                handleFileSelect();
+            }
+        });
+
+        function handleFileSelect() {
+            const file = fileInput.files[0];
+            fileError.style.display = 'none';
+
+            if (file) {
+                // Validate file size (10MB limit)
+                if (file.size > 10 * 1024 * 1024) {
+                    showFileError('File size must be less than 10MB');
+                    return;
+                }
+
+                // Validate file type
+                const allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'image/jpeg', 'image/jpg', 'image/png', 'text/plain'];
+                if (!allowedTypes.includes(file.type)) {
+                    showFileError('Please select a valid file type');
+                    return;
+                }
+
+                // Display selected file
+                fileName.textContent = file.name;
+                fileSize.textContent = formatFileSize(file.size);
+                selectedFile.style.display = 'flex';
+
+                // Hide the upload area
+                fileWrapper.style.display = 'none';
+            }
+        }
+
+        function showFileError(message) {
+            fileError.querySelector('span').textContent = message;
+            fileError.style.display = 'flex';
+            selectedFile.style.display = 'none';
+            fileWrapper.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        // Form submission - Let ASP.NET Core handle the actual submission
+        form.addEventListener('submit', (e) => {
+            if (!fileInput.files[0]) {
+                e.preventDefault();
+                showFileError('Please select a file to upload');
+                return;
+            }
+
+            // Show loading overlay
+            loadingOverlay.style.display = 'flex';
+
+            // Let the form submit naturally to ASP.NET Core
+            // The loading overlay will be hidden when the page reloads
+        });
+
+        // Reset file selection
+        selectedFile.addEventListener('click', () => {
+            selectedFile.style.display = 'none';
+            fileWrapper.style.display = 'block';
+            fileInput.value = '';
+            fileError.style.display = 'none';
+        });
+    </script>
+</body>
+</html>

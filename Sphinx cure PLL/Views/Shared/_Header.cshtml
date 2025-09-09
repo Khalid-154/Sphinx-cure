@@ -1,0 +1,52 @@
+﻿@{
+    var currentController = ViewContext.RouteData.Values["Controller"]?.ToString();
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+}
+
+<nav class="navbar navbar-expand-lg navbar-light medical-header">
+    <div class="container-fluid">
+        <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+            <div class="brand-icon">
+                <i class="fas fa-clinic-medical"></i>
+            </div>
+            Sphinx Cure Medical Clinic
+        </a>
+
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
+                aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link @(currentController == "Home" && currentAction == "Index" ? "active" : "")"
+                       asp-controller="Home" asp-action="Index">
+                        <i class="fas fa-home"></i> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(currentController == "Patient" && currentAction == "Index" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Index">
+                        <i class="fas fa-users"></i> All Patients
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link @(currentController == "Patient" && currentAction == "Create" ? "active" : "")"
+                       asp-controller="Patient" asp-action="Create">
+                        <i class="fas fa-user-plus"></i> Add Patient
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+<style>
+    .nav-link.active {
+        background: linear-gradient(45deg, #2c5aa0, #3742fa);
+        color: white !important;
+        box-shadow: 0 5px 15px rgba(44, 90, 160, 0.4);
+        border-radius: 25px;
+    }
+
+</style>

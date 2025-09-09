@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Sphinx_cure_.BLL.Helper;
 using Sphinx_cure_.BLL.ModelVM.Patient;
 using Sphinx_cure_.BLL.Services.Abstractions;
@@ -185,6 +186,32 @@ namespace Sphinx_cure_PLL.Controllers
 
             return PartialView("_PatientTable", patients);
         }
+
+
+        // بترجع أسماء بس (للاقتراحات)
+        [HttpGet]
+        public async Task<IActionResult> SearchNames(string term)
+        {
+            var (status, message, patients) = await _patientService.SearchPatientsByNameAsync(term);
+
+            if (!status || patients == null || patients.Count == 0)
+                return Json(new List<string>());
+
+            return Json(patients.Select(p => p.Name).ToList());
+        }
+
+        // بترجع جدول مريض واحد أو أكتر
+        [HttpGet]
+        public async Task<IActionResult> Search(string name)
+        {
+            var (status, message, patients) = await _patientService.SearchPatientsByNameAsync(name);
+
+            if (!status || patients == null || patients.Count == 0)
+                return PartialView("_PatientTable", new List<PatientDTO>());
+
+            return PartialView("_PatientTable", patients);
+        }
+
 
 
 
