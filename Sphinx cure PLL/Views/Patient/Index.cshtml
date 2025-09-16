@@ -46,16 +46,52 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
 
     <script>
-        // تحديث الجدول كل 3 ثواني
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/notificationHub")
+            .build();
+
+        connection.on("RefreshPatients", function (actionType) {
+            refreshPatientTable();
+
+            let toastConfig = {
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 2000,
+                timerProgressBar: true,
+                didOpen: (toast) => {
+                    toast.onmouseenter = Swal.stopTimer;
+                    toast.onmouseleave = Swal.resumeTimer;
+                }
+            };
+
+            switch (actionType) {
+                case "Create":
+                    Swal.fire({ ...toastConfig, icon: 'success', title: 'New patient added' });
+                    break;
+                case "Update":
+                    Swal.fire({ ...toastConfig, icon: 'info', title: 'Patient updated' });
+                    break;
+                case "Delete":
+                    Swal.fire({ ...toastConfig, icon: 'error', title: 'Patient deleted' });
+                    break;
+                default:
+                    Swal.fire({ ...toastConfig, icon: 'info', title: 'Patients list refreshed' });
+                    break;
+            }
+        });
+
+        connection.start().catch(err => console.error(err.toString()));
+
         function refreshPatientTable() {
             $.get('@Url.Action("GetPatientTable")', function (html) {
                 $("#patientTable tbody").html(html);
             });
         }
 
-        // الحذف
         function deletePatient(id, name) {
             Swal.fire({
                 title: 'Are you sure?',
@@ -74,8 +110,8 @@
                             __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').val()
                         },
                         success: function (msg) {
-                            Swal.fire('Deleted!', msg, 'success');
-                            refreshPatientTable();
+                            // هنا السيرفر نفسه هيبعت التوست (Delete)
+                            console.log(msg);
                         },
                         error: function (xhr) {
                             Swal.fire('Error', xhr.responseText || 'Delete failed', 'error');
@@ -86,13 +122,12 @@
         }
 
         $(document).ready(function () {
-            // البحث اللحظي و إظهار أسماء تحت الـ input
             $("#searchBox").on("keyup", function () {
                 var query = $(this).val().trim();
 
                 if (query.length === 0) {
                     $("#suggestions").empty();
-                    refreshPatientTable(); // يرجع الجدول كامل لما البحث يفضى
+                    refreshPatientTable();
                     return;
                 }
 
@@ -114,20 +149,15 @@
                 });
             });
 
-            // لما المستخدم يختار اسم من الليست
             $(document).on("click", ".suggestion-item", function () {
                 var selectedName = $(this).text();
                 $("#searchBox").val(selectedName);
                 $("#suggestions").empty();
 
-                // هنا نجيب الجدول بقى بالاسم المختار
                 $.get('@Url.Action("Search", "Patient")', { name: selectedName }, function (html) {
                     $("#patientTable tbody").html(html);
                 });
             });
         });
-
-        // تحديث الجدول كل 3 ثواني
-        setInterval(refreshPatientTable, 3000);
     </script>
 }

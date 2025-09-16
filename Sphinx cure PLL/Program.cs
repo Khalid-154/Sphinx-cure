@@ -1,10 +1,12 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http.Features;
 using Sphinx_cure_.BLL.Mapper.PatientMapping;
 using Sphinx_cure_.BLL.Services.Abstractions;
 using Sphinx_cure_.BLL.Services.Implementations;
 using Sphinx_cure_.DAL.Database;
 using Sphinx_cure_.DAL.Repo.Abstractions;
 using Sphinx_cure_.DAL.Repo.Implementations;
+using Sphinx_cure_PLL.Hubs;
 
 namespace Sphinx_cure_PLL
 {
@@ -27,11 +29,20 @@ namespace Sphinx_cure_PLL
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
+            builder.Services.AddSignalR();
+
             builder.Services.AddScoped<IPatientRepo, PatientRepo>();
             builder.Services.AddScoped<IPatientService, PatientService>();
 
+            builder.Services.Configure<FormOptions>(options =>
+            {
+                options.MultipartBodyLengthLimit = 104857600; // 100MB
+            });
+
 
             var app = builder.Build();
+
+            app.MapHub<NotificationHub>("/notificationHub");
 
 
             // Configure the HTTP request pipeline.

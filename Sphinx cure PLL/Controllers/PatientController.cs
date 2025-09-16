@@ -1,19 +1,25 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.SignalR;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Sphinx_cure_.BLL.Helper;
 using Sphinx_cure_.BLL.ModelVM.Patient;
 using Sphinx_cure_.BLL.Services.Abstractions;
 using Sphinx_cure_.DAL.Entities;
+using Sphinx_cure_PLL.Hubs;
 
 namespace Sphinx_cure_PLL.Controllers
 {
     public class PatientController : Controller
     {
         private readonly IPatientService _patientService;
+        private readonly IHubContext<NotificationHub> _hubContext;
 
-        public PatientController(IPatientService patientService)
+
+        public PatientController(IPatientService patientService, IHubContext<NotificationHub> hubContext)
         {
             _patientService = patientService;
+            _hubContext = hubContext;
+
         }
 
         [HttpGet]
@@ -59,6 +65,7 @@ namespace Sphinx_cure_PLL.Controllers
                 return View(model);
             }
 
+            await _hubContext.Clients.All.SendAsync("RefreshPatients", "Create");
             TempData["Success"] = message;
             return RedirectToAction(nameof(Index));
         }
@@ -94,6 +101,9 @@ namespace Sphinx_cure_PLL.Controllers
                 return View(model);
             }
 
+            await _hubContext.Clients.All.SendAsync("RefreshPatients", "Update");
+
+
             TempData["Success"] = message;
             return RedirectToAction(nameof(Details), new { id });
         }
@@ -105,9 +115,11 @@ namespace Sphinx_cure_PLL.Controllers
             var (status, message) = await _patientService.DeletePatientAsync(id);
 
             if (!status)
-                return StatusCode(500, message); // ترجع خطأ للـ AJAX
+                return StatusCode(500, message);
 
-            return Ok(message); // ترجع رسالة نجاح للـ AJAX
+            await _hubContext.Clients.All.SendAsync("RefreshPatients", "Delete");
+
+            return Ok(message); 
         }
 
 
@@ -188,7 +200,7 @@ namespace Sphinx_cure_PLL.Controllers
         }
 
 
-        // بترجع أسماء بس (للاقتراحات)
+        
         [HttpGet]
         public async Task<IActionResult> SearchNames(string term)
         {

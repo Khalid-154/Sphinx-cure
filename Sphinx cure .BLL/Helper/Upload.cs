@@ -16,6 +16,9 @@ namespace Sphinx_cure_.BLL.Helper
                 if (!AllowedExtensions.Contains(ext))
                     throw new Exception("File type not allowed. Only PDF or Word files are allowed.");
 
+                if (File.Length > 104857600) // 100MB
+                    throw new Exception("File size cannot exceed 100MB.");
+
 
                 string FolderPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", FolderName);
 
