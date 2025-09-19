@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Sphinx_cure_.DAL.Database;
 
@@ -11,9 +12,11 @@ using Sphinx_cure_.DAL.Database;
 namespace Sphinx_cure_.DAL.Migrations
 {
     [DbContext(typeof(SphinxCureDbContext))]
-    partial class SphinxCureDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250919173610_Add_user_table")]
+    partial class Add_user_table
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

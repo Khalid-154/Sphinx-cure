@@ -1,9 +1,12 @@
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Sphinx_cure_.BLL.Mapper.PatientMapping;
 using Sphinx_cure_.BLL.Services.Abstractions;
 using Sphinx_cure_.BLL.Services.Implementations;
 using Sphinx_cure_.DAL.Database;
+using Sphinx_cure_.DAL.Entities;
 using Sphinx_cure_.DAL.Repo.Abstractions;
 using Sphinx_cure_.DAL.Repo.Implementations;
 using Sphinx_cure_PLL.Hubs;
@@ -21,6 +24,19 @@ namespace Sphinx_cure_PLL
 
             builder.Services.AddDbContext<SphinxCureDbContext>(options =>
             options.UseSqlServer(connectionString));
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+    options =>
+    {
+        options.LoginPath = new PathString("/Account/Login");
+        options.AccessDeniedPath = new PathString("/Account/Login");
+    });
+
+            builder.Services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddEntityFrameworkStores<SphinxCureDbContext>()
+                .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
+
 
             builder.Services.AddAutoMapper(x => x.AddProfile(new PatientProfile()));
 
@@ -58,6 +74,7 @@ namespace Sphinx_cure_PLL
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(

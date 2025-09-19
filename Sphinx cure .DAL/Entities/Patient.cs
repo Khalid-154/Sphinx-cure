@@ -1,5 +1,7 @@
 ﻿
 
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace Sphinx_cure_.DAL.Entities
 {
     public class Patient
@@ -11,6 +13,11 @@ namespace Sphinx_cure_.DAL.Entities
         public string FilePath { get;  set; }
         public bool IsDeleted { get; private set; }
         public DateTime? DeletedAt { get; private set; }
+
+        public string? UserId { get; private set; }
+
+        [ForeignKey(nameof(UserId))]
+        public virtual User? User { get; private set; }
 
 
         public Patient() { }
