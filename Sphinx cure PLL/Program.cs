@@ -29,13 +29,26 @@ namespace Sphinx_cure_PLL
 .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
     options =>
     {
-        options.LoginPath = new PathString("/Account/Login");
-        options.AccessDeniedPath = new PathString("/Account/Login");
+        options.LoginPath = new PathString("/Account/SignIn");
+        options.AccessDeniedPath = new PathString("/Account/SignIn");
     });
 
             builder.Services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddEntityFrameworkStores<SphinxCureDbContext>()
                 .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
+
+
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {
+                // Default Password settings.
+                options.Password.RequireDigit = true;
+                options.Password.RequireLowercase = true;
+                options.Password.RequireNonAlphanumeric = true;
+                options.Password.RequireUppercase = true;
+                options.Password.RequiredLength = 6;
+                options.Password.RequiredUniqueChars = 0;
+            }).AddEntityFrameworkStores<SphinxCureDbContext>();
+
 
 
             builder.Services.AddAutoMapper(x => x.AddProfile(new PatientProfile()));
