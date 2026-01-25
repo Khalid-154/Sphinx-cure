@@ -1,7 +1,7 @@
 ﻿@model Sphinx_cure_.BLL.ModelVM.Account.LoginVM
 @{
     ViewData["Title"] = "Login";
-    Layout = "_Layout"; // Ensure it uses the correct layout
+    Layout = "_Layout";
 }
 
 <div class="text-center mb-4">
@@ -10,7 +10,11 @@
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-5 col-lg-4">
-            <div class="card shadow border-0 rounded-4 bg-light">
+            <div class="card shadow border-0 rounded-4 bg-light position-relative">
+                <!-- Dark/Light Mode Toggle Button -->
+                <button id="theme-toggle" class="btn btn-sm position-absolute top-0 end-0 m-2" style="z-index: 10;">
+                    <i class="bi bi-moon"></i>
+                </button>
                 <div class="card-body p-4">
                     <h3 class="text-center mb-4 text-dark fw-bold">
                         <i class="bi bi-box-arrow-in-right"></i> Login
@@ -28,7 +32,7 @@
                     }
 
                     <form asp-controller="Account" asp-action="SignIn" method="post">
-                        @Html.AntiForgeryToken() <!-- Explicit anti-forgery token -->
+                        @Html.AntiForgeryToken()
 
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -38,12 +42,14 @@
                             <span asp-validation-for="UserName" class="text-danger"></span>
                         </div>
 
-                        <div class="mb-3 position-relative">
+                        <div class="mb-3">
                             <label asp-for="Password" class="form-label">Password</label>
-                            <input asp-for="Password" class="form-control" placeholder="Enter password" type="password" id="passwordInput" />
-                            <span class="password-toggle" onclick="togglePassword('passwordInput')">
-                                <i class="bi bi-eye"></i>
-                            </span>
+                            <div class="input-group">
+                                <input asp-for="Password" class="form-control" placeholder="Enter password" type="password" id="passwordInput" />
+                                <button type="button" class="btn btn-outline-secondary" id="togglePasswordBtn" onclick="togglePassword('passwordInput')">
+                                    <i class="bi bi-eye" id="toggleIcon"></i>
+                                </button>
+                            </div>
                             <span asp-validation-for="Password" class="text-danger"></span>
                         </div>
 
@@ -103,5 +109,149 @@
                 submitBtn.html('<i class="bi bi-hourglass-split"></i> Signing in...');
             });
         });
+
+        // Dark/Light Mode Toggle
+        $(document).ready(function() {
+            const themeToggle = $('#theme-toggle');
+            const body = $('body');
+            const card = $('.card');
+
+            // Check for saved theme preference or default to light mode
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                body.addClass('dark-mode');
+                card.removeClass('bg-light').addClass('bg-dark text-light');
+                themeToggle.find('i').removeClass('bi-moon').addClass('bi-sun');
+            }
+
+            // Toggle theme on button click
+            themeToggle.on('click', function() {
+                if (body.hasClass('dark-mode')) {
+                    // Switch to light mode
+                    body.removeClass('dark-mode');
+                    card.removeClass('bg-dark text-light').addClass('bg-light');
+                    themeToggle.find('i').removeClass('bi-sun').addClass('bi-moon');
+                    localStorage.setItem('theme', 'light');
+                } else {
+                    // Switch to dark mode
+                    body.addClass('dark-mode');
+                    card.removeClass('bg-light').addClass('bg-dark text-light');
+                    themeToggle.find('i').removeClass('bi-moon').addClass('bi-sun');
+                    localStorage.setItem('theme', 'dark');
+                }
+            });
+        });
     </script>
 }
+
+<style>
+    /* Dark Mode Styles */
+    body.dark-mode {
+        background-color: #121212;
+        color: #ffffff;
+    }
+
+    body.dark-mode .text-dark {
+        color: #ffffff !important;
+    }
+
+    body.dark-mode .text-muted {
+        color: #cccccc !important;
+    }
+
+    body.dark-mode .form-control {
+        background-color: #333333;
+        color: #ffffff;
+        border-color: #555555;
+    }
+
+    body.dark-mode .form-control:focus {
+        background-color: #333333;
+        color: #ffffff;
+        border-color: #007bff;
+    }
+
+    body.dark-mode .input-group .form-control {
+        border-right: none; /* Remove right border when button is attached */
+    }
+
+    body.dark-mode .input-group .btn-outline-secondary {
+        background-color: #333333;
+        color: #ffffff;
+        border-color: #555555;
+        border-left: none;
+    }
+
+    body.dark-mode .input-group .btn-outline-secondary:hover {
+        background-color: #444444;
+        color: #ffffff;
+    }
+
+    body.dark-mode .btn-dark {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+
+    body.dark-mode .btn-dark:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+
+    body.dark-mode .alert-danger {
+        background-color: #d9534f;
+        color: #ffffff;
+        border-color: #d9534f;
+    }
+
+    body.dark-mode a {
+        color: #007bff;
+    }
+
+    body.dark-mode a:hover {
+        color: #0056b3;
+    }
+
+    body.dark-mode hr {
+        border-color: #555555;
+    }
+
+    /* Make sun icon white in dark mode */
+    body.dark-mode #theme-toggle .bi-sun {
+        color: white;
+    }
+
+    /* Make placeholder texts white in dark mode */
+    body.dark-mode .form-control::placeholder {
+        color: #cccccc;
+    }
+
+    /* Input group styling for better appearance */
+    .input-group .btn-outline-secondary {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        width: 45px; /* Fixed width for consistency */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .input-group .form-control {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+    }
+
+    /* Remove focus outline on password toggle button */
+    #togglePassword:focus {
+        box-shadow: none;
+        outline: none;
+    }
+
+    /* Hover effect for password toggle button */
+    #togglePassword:hover {
+        background-color: #f8f9fa;
+    }
+
+    body.dark-mode #togglePassword:hover {
+        background-color: #444444;
+    }
+</style>
