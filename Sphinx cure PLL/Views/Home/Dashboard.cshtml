@@ -1,0 +1,97 @@
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="container mt-5">
+    <h1 class="mb-4">Dashboard</h1>
+
+    <!-- Overview Cards -->
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="card text-white bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Total Patients</h5>
+                    <h2>@ViewBag.PatientCount</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Active Patients</h5>
+                    <h2>@ViewBag.PatientCount</h2> <!-- Assuming all are active for now -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-white bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Recent Additions</h5>
+                    <h2>@ViewBag.RecentPatients.Count</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h3>Quick Actions</h3>
+            <div class="d-flex gap-2">
+                <a href="@Url.Action("Create", "Patient")" class="btn btn-primary">Add New Patient</a>
+                <a href="@Url.Action("Index", "Patient")" class="btn btn-secondary">View All Patients</a>
+                <a href="@Url.Action("SearchNames", "Patient")" class="btn btn-info">Search Patients</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Patients -->
+    <div class="row">
+        <div class="col-12">
+            <h3>Recent Patients</h3>
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>File</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (ViewBag.RecentPatients != null && ViewBag.RecentPatients.Count > 0)
+                        {
+                            @foreach (var patient in ViewBag.RecentPatients)
+                            {
+                                <tr>
+                                    <td>@patient.Name</td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(patient.FilePath))
+                                        {
+                                            <a href="@Url.Action("ViewFile", "Patient", new { id = patient.Id })" target="_blank" class="btn btn-sm btn-outline-primary">View</a>
+                                            <a href="@Url.Action("DownloadFile", "Patient", new { id = patient.Id })" class="btn btn-sm btn-outline-secondary">Download</a>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">No file</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <a href="@Url.Action("Details", "Patient", new { id = patient.Id })" class="btn btn-sm btn-info">Details</a>
+                                        <a href="@Url.Action("UpdateFile", "Patient", new { id = patient.Id })" class="btn btn-sm btn-warning">Update File</a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="3" class="text-center">No recent patients found.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

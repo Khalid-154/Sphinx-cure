@@ -39,7 +39,7 @@ namespace Sphinx_cure_PLL.Controllers
                 {
                     // Auto login after registration
                     await _signInManager.SignInAsync(user, isPersistent: false);
-                    return RedirectToAction("Index", "Home");
+                    return RedirectToAction("Index", "Patient");
                 }
                 else
                 {
@@ -78,7 +78,7 @@ namespace Sphinx_cure_PLL.Controllers
                         // Sign in the user
                         await _signInManager.SignInAsync(user, login.RememberMe);
 
-                        return RedirectToAction("Index", "Home");
+                        return RedirectToAction("Dashboard", "Home");
                     }
                 }
 

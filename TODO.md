@@ -1,11 +1,7 @@
-# Fix Console Errors in Sphinx Cure Application
+# TODO: Create Dashboard Accessible After Login
 
-## Tasks
-- [ ] Remove missing Sphinx_cure_PLL.styles.css reference from _Layout.cshtml
-- [ ] Fix JavaScript errors by adding element existence checks
-- [ ] Add select2 library (CSS and JS) to wwwroot
-- [ ] Check font usage and remove unused font references
-- [ ] Test the application to verify errors are resolved
-
-## Progress
-- Started implementing fixes
+- [x] Add Dashboard action to HomeController.cs with [Authorize] attribute
+- [x] Create Views/Home/Dashboard.cshtml with dashboard content (patient count, recent patients, quick links)
+- [x] Update AccountController.cs SignIn action to redirect to Home/Dashboard instead of Patient/Index
+- [ ] Test login flow to ensure dashboard loads after authentication
+- [ ] Verify authorization prevents unauthenticated access
