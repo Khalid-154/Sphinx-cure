@@ -5903,18 +5903,6 @@ h6 {
   }
 }
 
-/* line 1437, C:/Users/SPN Graphics/Desktop/CL September/210 Medical/HTML/scss/_blog.scss */
-.comment-form .email {
-  padding-right: 0px;
-}
-
-@media (max-width: 991px) {
-  /* line 1437, C:/Users/SPN Graphics/Desktop/CL September/210 Medical/HTML/scss/_blog.scss */
-  .comment-form .email {
-    padding-left: 0px;
-  }
-}
-
 /* line 1445, C:/Users/SPN Graphics/Desktop/CL September/210 Medical/HTML/scss/_blog.scss */
 .comment-form .form-control {
   border: 1px solid #f0e9ff;

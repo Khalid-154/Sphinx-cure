@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -23,43 +22,50 @@ namespace Sphinx_cure_PLL
             var connectionString = builder.Configuration.GetConnectionString("defaultConnection");
 
             builder.Services.AddDbContext<SphinxCureDbContext>(options =>
-            options.UseSqlServer(connectionString));
-
-            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-    options =>
-    {
-        options.LoginPath = new PathString("/Account/SignIn");
-        options.AccessDeniedPath = new PathString("/Account/SignIn");
-    });
-
-            builder.Services.AddIdentityCore<User>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<SphinxCureDbContext>()
-                .AddTokenProvider<DataProtectorTokenProvider<User>>(TokenOptions.DefaultProvider);
-
-
-            builder.Services.AddIdentity<User, IdentityRole>(options =>
-            {
-                // Default Password settings.
-                options.Password.RequireDigit = true;
-                options.Password.RequireLowercase = true;
-                options.Password.RequireNonAlphanumeric = true;
-                options.Password.RequireUppercase = true;
-                options.Password.RequiredLength = 6;
-                options.Password.RequiredUniqueChars = 0;
-            }).AddEntityFrameworkStores<SphinxCureDbContext>();
-
-
-
-            builder.Services.AddAutoMapper(x => x.AddProfile(new PatientProfile()));
-
-
+                options.UseSqlServer(connectionString));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
-            builder.Services.AddSignalR();
+            // SINGLE Identity configuration - Remove the conflicting ones!
+            builder.Services.AddIdentity<User, IdentityRole>(options =>
+            {
+                // DISABLE all email requirements
+                options.SignIn.RequireConfirmedEmail = false;
+                options.SignIn.RequireConfirmedAccount = false;
+                options.SignIn.RequireConfirmedPhoneNumber = false;
 
+                // Make email NOT required for users
+                options.User.RequireUniqueEmail = false;
+
+                // Simplify password rules for testing
+                options.Password.RequireDigit = false;
+                options.Password.RequiredLength = 3;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequiredUniqueChars = 0;
+
+                // Optional: Adjust user settings
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+";
+            })
+            .AddEntityFrameworkStores<SphinxCureDbContext>()
+            .AddDefaultTokenProviders();
+
+            // Cookie configuration (optional - Identity has defaults)
+            builder.Services.ConfigureApplicationCookie(options =>
+            {
+                options.LoginPath = "/Account/SignIn";
+                options.AccessDeniedPath = "/Account/AccessDenied";
+                options.LogoutPath = "/Account/Logout";
+                options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                options.SlidingExpiration = true;
+                options.Cookie.HttpOnly = true;
+                options.Cookie.IsEssential = true;
+            });
+
+            builder.Services.AddAutoMapper(x => x.AddProfile(new PatientProfile()));
+            builder.Services.AddSignalR();
             builder.Services.AddScoped<IPatientRepo, PatientRepo>();
             builder.Services.AddScoped<IPatientService, PatientService>();
 
@@ -68,17 +74,14 @@ namespace Sphinx_cure_PLL
                 options.MultipartBodyLengthLimit = 104857600; // 100MB
             });
 
-
             var app = builder.Build();
 
             app.MapHub<NotificationHub>("/notificationHub");
-
 
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
@@ -87,7 +90,7 @@ namespace Sphinx_cure_PLL
 
             app.UseRouting();
 
-            app.UseAuthentication();
+            app.UseAuthentication(); // This must come before UseAuthorization
             app.UseAuthorization();
 
             app.MapControllerRoute(

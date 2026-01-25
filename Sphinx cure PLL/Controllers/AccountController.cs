@@ -27,29 +27,32 @@ namespace Sphinx_cure_PLL.Controllers
         {
             if (ModelState.IsValid)
             {
+                // Create user without email if not provided
                 var user = new User()
                 {
-                    UserName = registerVM.UserName,
-                    Email = registerVM.Email
+                    UserName = registerVM.UserName
                 };
 
                 var result = await _userManager.CreateAsync(user, registerVM.Password);
 
                 if (result.Succeeded)
                 {
-                    return RedirectToAction("SignIn", "Account");
+                    // Auto login after registration
+                    await _signInManager.SignInAsync(user, isPersistent: false);
+                    return RedirectToAction("Index", "Home");
                 }
                 else
                 {
-                    foreach (var item in result.Errors)
+                    foreach (var error in result.Errors)
                     {
-                        ModelState.AddModelError("Password", item.Description);
+                        ModelState.AddModelError("", error.Description);
                     }
                 }
             }
-            
+
             return View(registerVM);
         }
+
         [HttpGet]
         public async Task<IActionResult> SignIn()
         {
@@ -62,17 +65,25 @@ namespace Sphinx_cure_PLL.Controllers
         {
             if (ModelState.IsValid)
             {
-                var result = await _signInManager.PasswordSignInAsync(login.UserName, login.Password, true, false);
+                // Find user by username ONLY (not by email)
+                var user = await _userManager.FindByNameAsync(login.UserName);
 
-                if (result.Succeeded)
+                if (user != null)
                 {
-                    return RedirectToAction("Index", "Home");
-                }
-                else
-                {
-                    ModelState.AddModelError("", "Invalid UserName Or Password");
+                    // Check password
+                    var passwordValid = await _userManager.CheckPasswordAsync(user, login.Password);
 
+                    if (passwordValid)
+                    {
+                        // Sign in the user
+                        await _signInManager.SignInAsync(user, login.RememberMe);
+
+                        return RedirectToAction("Index", "Home");
+                    }
                 }
+
+                // If we get here, login failed
+                ModelState.AddModelError("", "Invalid username or password");
             }
 
             return View(login);

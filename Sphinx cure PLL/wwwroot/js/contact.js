@@ -24,10 +24,6 @@ $(document).ready(function(){
                     required: true,
                     minlength: 5
                 },
-                email: {
-                    required: true,
-                    email: true
-                },
                 message: {
                     required: true,
                     minlength: 20
@@ -45,9 +41,6 @@ $(document).ready(function(){
                 number: {
                     required: "come on, you have a number, don't you?",
                     minlength: "your Number must consist of at least 5 characters"
-                },
-                email: {
-                    required: "no email, no message"
                 },
                 message: {
                     required: "um...yea, you have to write something to send this form.",
