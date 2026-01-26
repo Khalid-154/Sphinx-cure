@@ -158,6 +158,9 @@
     <!-- jQuery FIRST (required for all jQuery plugins) -->
     <script src="~/js/vendor/jquery-1.12.4.min.js"></script>
 
+    <!-- SignalR JavaScript library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/6.0.1/signalr.min.js"></script>
+
     <!-- Other JS files -->
     <script src="~/js/vendor/modernizr-3.5.0.min.js"></script>
     <script src="~/js/popper.min.js"></script>
@@ -221,8 +224,29 @@
             if (birthDateInput) {
                 birthDateInput.max = new Date().toISOString().split('T')[0];
             }
+
+            // SignalR Notification Connection
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl("/notificationHub")
+                .build();
+
+            connection.on("ReceiveNotification", function (message) {
+                // Update notification badge
+                const badge = document.getElementById("notificationBadge");
+                let count = parseInt(badge.textContent) || 0;
+                count++;
+                badge.textContent = count;
+                badge.style.display = "inline";
+
+                // Show a simple alert for the notification
+                alert(message);
+            });
+
+            connection.start().catch(function (err) {
+                return console.error(err.toString());
+            });
         });
-        
+
     </script>
 </body>
 </html>

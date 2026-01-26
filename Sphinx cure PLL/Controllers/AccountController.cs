@@ -89,5 +89,13 @@ namespace Sphinx_cure_PLL.Controllers
             return View(login);
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Logout()
+        {
+            await _signInManager.SignOutAsync();
+            return RedirectToAction("SignIn");
+        }
+
     }
 }

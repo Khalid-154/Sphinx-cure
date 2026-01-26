@@ -123,9 +123,11 @@
                         </div>
 
                     <div class="nav-item ms-3">
-                        <a href="@Url.Action("SignOut", "Account")" class="btn btn-outline-danger btn-sm">
-                            <i class="fas fa-sign-out-alt"></i> Logout
-                        </a>
+                        <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-outline-danger btn-sm">
+                                <i class="fas fa-sign-out-alt"></i> Logout
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
