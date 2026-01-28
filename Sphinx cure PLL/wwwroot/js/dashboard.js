@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialize theme
     initializeTheme();
 
-    // Update current time
+    // Update current time with hours and minutes
     function updateTime() {
         const now = new Date();
         const options = {
@@ -11,80 +11,59 @@ document.addEventListener('DOMContentLoaded', function () {
             month: 'long',
             day: 'numeric',
             hour: '2-digit',
-            minute: '2-digit'
+            minute: '2-digit',
+            second: '2-digit'
         };
         document.getElementById('currentTime').textContent = now.toLocaleDateString('en-US', options);
     }
 
     updateTime();
-    setInterval(updateTime, 60000);
-
-    // Sidebar toggle for desktop
-    const sidebarToggleDesktop = document.getElementById('sidebarToggleDesktop');
-    const sidebarWrapper = document.querySelector('.sidebar-wrapper');
-
-    if (sidebarToggleDesktop) {
-        sidebarToggleDesktop.addEventListener('click', function () {
-            sidebarWrapper.classList.toggle('collapsed');
-        });
-    }
-
-    // Sidebar toggle for mobile
-    const sidebarToggleMobile = document.getElementById('sidebarToggleMobile');
-    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
-
-    if (sidebarToggleMobile) {
-        sidebarToggleMobile.addEventListener('click', function () {
-            sidebarWrapper.classList.toggle('mobile-open');
-        });
-    }
-
-    // Mobile menu toggle button (if exists)
-    if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener('click', function () {
-            sidebarWrapper.classList.toggle('mobile-open');
-        });
-    }
-
-    // Close sidebar on mobile when clicking outside
-    document.addEventListener('click', function (event) {
-        if (window.innerWidth <= 992) {
-            const sidebar = document.querySelector('.sidebar-wrapper');
-            const mobileToggle = document.querySelector('.mobile-menu-toggle');
-
-            if (!sidebar.contains(event.target) &&
-                (!mobileToggle || !mobileToggle.contains(event.target)) &&
-                sidebar.classList.contains('mobile-open')) {
-                sidebar.classList.remove('mobile-open');
-            }
-        }
-    });
+    setInterval(updateTime, 1000); // Update every second for seconds display
 
     // Add animation to cards on load
-    const cards = document.querySelectorAll('.stat-card, .quick-action-btn');
-    cards.forEach((card, index) => {
-        card.style.animationDelay = `${index * 0.1}s`;
-        card.classList.add('animate__animated', 'animate__fadeInUp');
-    });
+    setTimeout(function () {
+        const cards = document.querySelectorAll('.stat-card');
+        cards.forEach((card, index) => {
+            card.style.animationDelay = `${index * 0.1}s`;
+        });
+    }, 100);
+
+    // Check and apply saved sidebar state
+    const savedSidebarState = localStorage.getItem('sidebarCollapsed');
+    if (savedSidebarState === 'true' && layoutContainer) {
+        layoutContainer.classList.add('sidebar-collapsed');
+    }
 
     // Update active navigation link
-    const currentPath = window.location.pathname.toLowerCase();
-    const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
+    function updateActiveNavLink() {
+        const currentPath = window.location.pathname.toLowerCase();
+        const navLinks = document.querySelectorAll('.sidebar-menu .menu-item');
 
-    navLinks.forEach(link => {
-        const href = link.getAttribute('href').toLowerCase();
-        if (currentPath.includes(href.replace('dashboard', '')) ||
-            (currentPath === '/' && href.includes('dashboard'))) {
-            link.classList.add('active');
-        } else {
+        navLinks.forEach(link => {
             link.classList.remove('active');
-        }
-    });
+            const href = link.getAttribute('href').toLowerCase();
+
+            // Check if current path matches the href
+            if (href && currentPath.includes(href.replace('/home/dashboard', '').replace('/dashboard', '')) ||
+                (currentPath === '/' && href.includes('dashboard'))) {
+                link.classList.add('active');
+            }
+        });
+    }
+
+    updateActiveNavLink();
 
     // Theme toggle functionality
     function initializeTheme() {
         const themeToggle = document.getElementById('themeToggle');
-        const savedTheme = localStorage.getItem('theme') || 'light';
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+
+        // Get saved theme or use system preference
+        let savedTheme = localStorage.getItem('theme');
+
+        if (!savedTheme) {
+            savedTheme = prefersDarkScheme.matches ? 'dark' : 'light';
+        }
 
         // Apply saved theme
         document.documentElement.setAttribute('data-theme', savedTheme);
@@ -96,6 +75,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (themeToggle) {
             themeToggle.addEventListener('click', toggleTheme);
         }
+
+        // Listen for system theme changes (only if no manual theme is set)
+        prefersDarkScheme.addEventListener('change', function (e) {
+            if (!localStorage.getItem('theme')) {
+                const newTheme = e.matches ? 'dark' : 'light';
+                document.documentElement.setAttribute('data-theme', newTheme);
+                updateThemeToggleIcon(newTheme);
+            }
+        });
     }
 
     function toggleTheme() {
@@ -113,30 +101,57 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Dispatch custom event for other components
         document.dispatchEvent(new CustomEvent('themeChanged', { detail: newTheme }));
+
+        // Add smooth transition
+        document.body.style.transition = 'background-color 0.3s ease, color 0.3s ease';
+        setTimeout(() => {
+            document.body.style.transition = '';
+        }, 300);
     }
 
     function updateThemeToggleIcon(theme) {
         const themeToggle = document.getElementById('themeToggle');
         if (themeToggle) {
-            const icon = themeToggle.querySelector('i');
-            if (icon) {
-                // Icon will be automatically updated via CSS
-                // This function is for any additional updates if needed
+            const sunIcon = themeToggle.querySelector('.fa-sun');
+            const moonIcon = themeToggle.querySelector('.fa-moon');
+
+            if (sunIcon && moonIcon) {
+                // Remove any existing classes first
+                sunIcon.classList.remove('d-none');
+                moonIcon.classList.remove('d-none');
+
+                // Add Bootstrap d-none class to hide/show
+                if (theme === 'dark') {
+                    sunIcon.classList.add('d-none');
+                    moonIcon.classList.remove('d-none');
+                } else {
+                    sunIcon.classList.remove('d-none');
+                    moonIcon.classList.add('d-none');
+                }
             }
         }
     }
 
-    // Listen for system theme changes
-    if (window.matchMedia) {
-        const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-
-        systemThemeQuery.addEventListener('change', (e) => {
-            // Only auto-switch if user hasn't made a manual choice
-            if (!localStorage.getItem('theme')) {
-                const newTheme = e.matches ? 'dark' : 'light';
-                document.documentElement.setAttribute('data-theme', newTheme);
-                updateThemeToggleIcon(newTheme);
+    // Initialize tooltips for collapsed sidebar
+    function initializeTooltips() {
+        const menuItems = document.querySelectorAll('.menu-item');
+        menuItems.forEach(item => {
+            // Ensure tooltip attribute exists
+            if (!item.hasAttribute('data-tooltip')) {
+                const menuText = item.querySelector('.menu-text');
+                if (menuText) {
+                    item.setAttribute('data-tooltip', menuText.textContent.trim());
+                }
             }
         });
     }
+
+    initializeTooltips();
+
+    // Add loading animation for better UX
+    document.body.style.opacity = '0';
+    document.body.style.transition = 'opacity 0.3s ease';
+    setTimeout(() => {
+        document.body.style.opacity = '1';
+    }, 100);
 });

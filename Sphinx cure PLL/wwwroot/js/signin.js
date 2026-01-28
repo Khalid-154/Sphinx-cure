@@ -15,8 +15,8 @@ function togglePassword(inputId) {
 }
 
 // Form submission feedback
-$(document).ready(function() {
-    $('form').on('submit', function() {
+$(document).ready(function () {
+    $('form').on('submit', function () {
         const submitBtn = $(this).find('button[type="submit"]');
         submitBtn.prop('disabled', true);
         submitBtn.html('<i class="bi bi-hourglass-split"></i> Signing in...');
@@ -24,7 +24,7 @@ $(document).ready(function() {
 });
 
 // Dark/Light Mode Toggle
-$(document).ready(function() {
+$(document).ready(function () {
     const themeToggle = $('#theme-toggle');
     const body = $('body');
     const card = $('.card');
@@ -38,7 +38,7 @@ $(document).ready(function() {
     }
 
     // Toggle theme on button click
-    themeToggle.on('click', function() {
+    themeToggle.on('click', function () {
         if (body.hasClass('dark-mode')) {
             // Switch to light mode
             body.removeClass('dark-mode');

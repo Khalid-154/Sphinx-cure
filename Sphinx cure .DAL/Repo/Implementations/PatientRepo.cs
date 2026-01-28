@@ -7,7 +7,7 @@ using Sphinx_cure_.DAL.Repo.Abstractions;
 
 namespace Sphinx_cure_.DAL.Repo.Implementations
 {
-    public class PatientRepo: IPatientRepo
+    public class PatientRepo : IPatientRepo
     {
         private readonly SphinxCureDbContext _context;
         public PatientRepo(SphinxCureDbContext context)
@@ -18,7 +18,7 @@ namespace Sphinx_cure_.DAL.Repo.Implementations
         public async Task<List<Patient>> GetAllAsync()
         {
             return await _context.Patients
-                         .Where(p => !p.IsDeleted) 
+                         .Where(p => !p.IsDeleted)
                          .OrderBy(p => p.Name)
                          .ToListAsync();
         }
@@ -26,7 +26,7 @@ namespace Sphinx_cure_.DAL.Repo.Implementations
         public async Task<Patient?> GetByIdAsync(int id)
         {
             return await _context.Patients
-                                 .Where(p => p.Id == id) 
+                                 .Where(p => p.Id == id)
                                  .FirstOrDefaultAsync();
         }
 

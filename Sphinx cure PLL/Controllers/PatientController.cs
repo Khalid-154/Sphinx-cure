@@ -44,14 +44,14 @@ namespace Sphinx_cure_PLL.Controllers
             return View(patient);
         }
 
-        
+
         [HttpGet]
         public IActionResult Create()
         {
             return View();
         }
 
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(AddPatientVM model, IFormFile file)
@@ -121,7 +121,7 @@ namespace Sphinx_cure_PLL.Controllers
 
             await _hubContext.Clients.All.SendAsync("RefreshPatients", "Delete");
 
-            return Ok(message); 
+            return Ok(message);
         }
 
 
@@ -188,7 +188,7 @@ namespace Sphinx_cure_PLL.Controllers
                 _ => "application/octet-stream"
             };
 
-            return File(memory, contentType); 
+            return File(memory, contentType);
         }
 
         [HttpGet]
@@ -202,7 +202,7 @@ namespace Sphinx_cure_PLL.Controllers
         }
 
 
-        
+
         [HttpGet]
         public async Task<IActionResult> SearchNames(string term)
         {

@@ -43,7 +43,7 @@ namespace Sphinx_cure_.BLL.Helper
                     ? FileName
                     : Path.Combine(subFolder, FileName);
 
-                return relativePath.Replace("\\", "/"); 
+                return relativePath.Replace("\\", "/");
             }
             catch (Exception ex)
             {

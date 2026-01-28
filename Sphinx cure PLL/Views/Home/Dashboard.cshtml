@@ -4,7 +4,7 @@
 }
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -16,6 +16,9 @@
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
 
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="~/css/dashboard.css" />
 </head>
@@ -25,6 +28,11 @@
         <aside class="sidebar" id="sidebar">
             <!-- Sidebar Header -->
             <div class="sidebar-header">
+                <div class="clinic-logo">
+                    <img src="~/img/logo.jpg" alt="Sphinx Cure Logo" class="clinic-logo-img">
+                </div>
+                <h2 class="clinic-name">Sphinx Cure</h2>
+
                 <div class="user-profile-header">
                     <div class="user-avatar-header">
                         <i class="fas fa-user-md"></i>
@@ -116,6 +124,10 @@
             <!-- Top Navigation Bar -->
             <nav class="top-navbar">
                 <div class="container-fluid d-flex align-items-center">
+
+                    <!-- Page Title -->
+                    <h4 class="mb-0 d-none d-lg-block">Dashboard</h4>
+
                     <div class="d-flex align-items-center ms-auto">
                         <!-- Notifications Dropdown -->
                         <div class="dropdown me-3">
@@ -143,7 +155,7 @@
                         <!-- Theme Toggle -->
                         <div class="me-3">
                             <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
-                                <i class="fas fa-moon"></i>
+                                <i class="fas fa-moon d-none"></i>
                                 <i class="fas fa-sun"></i>
                             </button>
                         </div>
@@ -151,20 +163,21 @@
                 </div>
             </nav>
 
-            <!-- Dashboard Content (Keep your existing content here) -->
+            <!-- Dashboard Content -->
             <div class="content-wrapper">
                 <!-- Welcome Banner -->
                 <div class="row mb-4">
                     <div class="col-12">
-                        <div class="welcome-banner">
+                        <div class="welcome-banner animate__animated animate__fadeIn">
                             <div class="row align-items-center">
                                 <div class="col-md-8">
                                     <h1 class="mb-2">Welcome to Sphinx Cure</h1>
+                                    <p class="mb-0">Hello, @(ViewBag.CurrentUserName ?? "User")! Here's what's happening today.</p>
                                 </div>
                                 <div class="col-md-4 text-md-end">
                                     <div class="current-time">
                                         <i class="fas fa-clock me-2"></i>
-                                        <span id="currentTime">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+                                        <span id="currentTime">@DateTime.Now.ToString("dddd, MMMM dd, yyyy HH:mm")</span>
                                     </div>
                                 </div>
                             </div>
@@ -222,7 +235,7 @@
                                 <i class="fas fa-file-medical-alt"></i>
                             </div>
                             <div class="stat-content">
-                                <h3>@(ViewBag.RecentPatients?.Count ?? 0)</h3>
+                                <h3>@(ViewBag.RecentPatientsCount ?? (ViewBag.RecentPatients != null ? ViewBag.RecentPatients.Count : 0))</h3>
                                 <p>Recent Additions</p>
                                 <small class="text-info">
                                     Last 7 days
@@ -256,9 +269,12 @@
                                             </tr>
                                         </thead>
                                         <tbody>
-                                            @if (ViewBag.RecentPatients != null && ViewBag.RecentPatients.Count > 0)
+                                            @{
+                                                var recentPatients = ViewBag.RecentPatients as List<dynamic>;
+                                            }
+                                            @if (recentPatients != null && recentPatients.Count > 0)
                                             {
-                                                @foreach (var patient in ViewBag.RecentPatients)
+                                                foreach (var patient in recentPatients)
                                                 {
                                                     <tr>
                                                         <td>
@@ -267,30 +283,50 @@
                                                                     <i class="fas fa-user"></i>
                                                                 </div>
                                                                 <div>
-                                                                    <strong>@patient.Name</strong>
-                                                                    <div class="text-muted small">ID: @patient.Id</div>
+                                                                    <strong>@(patient.Name ?? "N/A")</strong>
+                                                                    <div class="text-muted small">ID: @(patient.Id ?? "N/A")</div>
                                                                 </div>
                                                             </div>
                                                         </td>
                                                         <td>
-                                                            <small>@DateTime.Now.AddDays(-ViewBag.RecentPatients.IndexOf(patient)).ToString("MMM dd, yyyy")</small>
+                                                            @if (patient.RegistrationDate != null)
+                                                            {
+                                                                <small>@(patient.RegistrationDate.ToString("MMM dd, yyyy"))</small>
+                                                            }
+                                                            else if (patient.CreatedDate != null)
+                                                            {
+                                                                <small>@(patient.CreatedDate.ToString("MMM dd, yyyy"))</small>
+                                                            }
+                                                            else
+                                                            {
+                                                                <small>N/A</small>
+                                                            }
                                                         </td>
                                                         <td>
-                                                            <span class="badge bg-success">Active</span>
+                                                            @{
+                                                                var status = patient.Status?.ToString() ?? "Active";
+                                                                var badgeClass = status == "Active" ? "bg-success" :
+                                                                status == "Inactive" ? "bg-secondary" :
+                                                                status == "Pending" ? "bg-warning" : "bg-info";
+                                                            }
+                                                            <span class="badge @badgeClass">@status</span>
                                                         </td>
                                                         <td>
                                                             <div class="btn-group btn-group-sm">
-                                                                <a href="@Url.Action("Details", "Patient", new { id = patient.Id })" class="btn btn-outline-info" title="View Details">
-                                                                    <i class="fas fa-eye"></i>
-                                                                </a>
-                                                                <a href="@Url.Action("UpdateFile", "Patient", new { id = patient.Id })" class="btn btn-outline-warning" title="Update File">
-                                                                    <i class="fas fa-edit"></i>
-                                                                </a>
-                                                                @if (!string.IsNullOrEmpty(patient.FilePath))
+                                                                @if (patient.Id != null)
                                                                 {
-                                                                    <a href="@Url.Action("DownloadFile", "Patient", new { id = patient.Id })" class="btn btn-outline-success" title="Download File">
-                                                                        <i class="fas fa-download"></i>
+                                                                    <a href="@Url.Action("Details", "Patient", new { id = patient.Id })" class="btn btn-outline-info" title="View Details">
+                                                                        <i class="fas fa-eye"></i>
                                                                     </a>
+                                                                    <a href="@Url.Action("UpdateFile", "Patient", new { id = patient.Id })" class="btn btn-outline-warning" title="Update File">
+                                                                        <i class="fas fa-edit"></i>
+                                                                    </a>
+                                                                    @if (!string.IsNullOrEmpty(patient.FilePath?.ToString()))
+                                                                    {
+                                                                        <a href="@Url.Action("DownloadFile", "Patient", new { id = patient.Id })" class="btn btn-outline-success" title="Download File">
+                                                                            <i class="fas fa-download"></i>
+                                                                        </a>
+                                                                    }
                                                                 }
                                                             </div>
                                                         </td>

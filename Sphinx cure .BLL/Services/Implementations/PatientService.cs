@@ -85,7 +85,7 @@ namespace Sphinx_cure_.BLL.Services.Implementations
         {
             try
             {
-               var patient = await _patientRepo.GetByIdAsync(id);
+                var patient = await _patientRepo.GetByIdAsync(id);
                 if (patient == null)
                     return (false, "Patient not found");
 

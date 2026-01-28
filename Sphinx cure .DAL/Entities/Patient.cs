@@ -6,11 +6,11 @@ namespace Sphinx_cure_.DAL.Entities
 {
     public class Patient
     {
-        public int Id { get;private set; }
-        public string Name { get;private set; }
+        public int Id { get; private set; }
+        public string Name { get; private set; }
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
-        public string FilePath { get;  set; }
+        public string FilePath { get; set; }
         public bool IsDeleted { get; private set; }
         public DateTime? DeletedAt { get; private set; }
 
@@ -28,7 +28,7 @@ namespace Sphinx_cure_.DAL.Entities
             Name = name;
             CreatedAt = DateTime.Now;
             FilePath = filePath;
-            IsDeleted = false; 
+            IsDeleted = false;
         }
 
         public void UpdateFile(string newFilePath)

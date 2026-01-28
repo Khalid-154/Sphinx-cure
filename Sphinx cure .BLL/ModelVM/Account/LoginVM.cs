@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 namespace Sphinx_cure_.BLL.ModelVM.Account;
+
 public class LoginVM
 {
     [Required]

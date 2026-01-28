@@ -13,7 +13,7 @@ namespace Sphinx_cure_.BLL.Services.Abstractions
     {
         Task<(bool status, string message, List<PatientDTO> patients)> GetAllPatientsAsync();
         Task<(bool status, string message, PatientDTO? patient)> GetPatientByIdAsync(int id);
-        Task<(bool status, string message)> AddPatientAsync(AddPatientVM patientDto,IFormFile file);
+        Task<(bool status, string message)> AddPatientAsync(AddPatientVM patientDto, IFormFile file);
         Task<(bool status, string message)> UpdatePatientAsync(int patientId, UpdatePatientFileVM model);
         Task<(bool status, string message)> DeletePatientAsync(int id);
         Task<(bool status, string message, List<PatientDTO> patients)> SearchPatientsByNameAsync(string name);
