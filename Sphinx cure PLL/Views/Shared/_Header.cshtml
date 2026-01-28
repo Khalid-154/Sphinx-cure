@@ -64,6 +64,16 @@
                         </a>
                     </li>
 
+                    @if (!(currentController == "Home" && currentAction == "Dashboard") && !(currentController == "Account" && currentAction == "SignIn"))
+                    {
+                        <!-- Return to Dashboard Button -->
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Home" asp-action="Dashboard">
+                                <i class="fas fa-arrow-left"></i> Back to Dashboard
+                            </a>
+                        </li>
+                    }
+
                     <!-- Logout Button -->
                     <li class="nav-item">
                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
