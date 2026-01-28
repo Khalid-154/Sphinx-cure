@@ -1,7 +1,7 @@
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize theme
     initializeTheme();
-    
+
     // Update current time
     function updateTime() {
         const now = new Date();
@@ -24,7 +24,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const sidebarWrapper = document.querySelector('.sidebar-wrapper');
 
     if (sidebarToggleDesktop) {
-        sidebarToggleDesktop.addEventListener('click', function() {
+        sidebarToggleDesktop.addEventListener('click', function () {
             sidebarWrapper.classList.toggle('collapsed');
         });
     }
@@ -34,24 +34,24 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuToggle = document.getElementById('mobileMenuToggle');
 
     if (sidebarToggleMobile) {
-        sidebarToggleMobile.addEventListener('click', function() {
+        sidebarToggleMobile.addEventListener('click', function () {
             sidebarWrapper.classList.toggle('mobile-open');
         });
     }
 
     // Mobile menu toggle button (if exists)
     if (mobileMenuToggle) {
-        mobileMenuToggle.addEventListener('click', function() {
+        mobileMenuToggle.addEventListener('click', function () {
             sidebarWrapper.classList.toggle('mobile-open');
         });
     }
 
     // Close sidebar on mobile when clicking outside
-    document.addEventListener('click', function(event) {
+    document.addEventListener('click', function (event) {
         if (window.innerWidth <= 992) {
             const sidebar = document.querySelector('.sidebar-wrapper');
             const mobileToggle = document.querySelector('.mobile-menu-toggle');
-            
+
             if (!sidebar.contains(event.target) &&
                 (!mobileToggle || !mobileToggle.contains(event.target)) &&
                 sidebar.classList.contains('mobile-open')) {
@@ -70,10 +70,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // Update active navigation link
     const currentPath = window.location.pathname.toLowerCase();
     const navLinks = document.querySelectorAll('.sidebar-nav .nav-link');
-    
+
     navLinks.forEach(link => {
         const href = link.getAttribute('href').toLowerCase();
-        if (currentPath.includes(href.replace('dashboard', '')) || 
+        if (currentPath.includes(href.replace('dashboard', '')) ||
             (currentPath === '/' && href.includes('dashboard'))) {
             link.classList.add('active');
         } else {
@@ -85,13 +85,13 @@ document.addEventListener('DOMContentLoaded', function() {
     function initializeTheme() {
         const themeToggle = document.getElementById('themeToggle');
         const savedTheme = localStorage.getItem('theme') || 'light';
-        
+
         // Apply saved theme
         document.documentElement.setAttribute('data-theme', savedTheme);
-        
+
         // Update toggle button icon
         updateThemeToggleIcon(savedTheme);
-        
+
         // Add event listener to theme toggle button
         if (themeToggle) {
             themeToggle.addEventListener('click', toggleTheme);
@@ -101,16 +101,16 @@ document.addEventListener('DOMContentLoaded', function() {
     function toggleTheme() {
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        
+
         // Apply new theme
         document.documentElement.setAttribute('data-theme', newTheme);
-        
+
         // Save to localStorage
         localStorage.setItem('theme', newTheme);
-        
+
         // Update toggle button icon
         updateThemeToggleIcon(newTheme);
-        
+
         // Dispatch custom event for other components
         document.dispatchEvent(new CustomEvent('themeChanged', { detail: newTheme }));
     }
@@ -129,7 +129,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Listen for system theme changes
     if (window.matchMedia) {
         const systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        
+
         systemThemeQuery.addEventListener('change', (e) => {
             // Only auto-switch if user hasn't made a manual choice
             if (!localStorage.getItem('theme')) {
