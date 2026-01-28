@@ -1,6 +1,6 @@
 @{
     ViewData["Title"] = "Dashboard";
-    Layout = null; // This page handles its own layout
+    Layout = null;
 }
 
 <!DOCTYPE html>
@@ -9,48 +9,457 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Sphinx Cure</title>
-    
+
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
-    
-    <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    
+
     <!-- Dashboard CSS -->
     <link rel="stylesheet" href="~/css/dashboard.css" />
-    
+
     <style>
-        /* Additional inline styles if needed */
+        :root {
+            --sidebar-width: 260px;
+            --sidebar-collapsed-width: 70px;
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
+            display: flex;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             overflow-x: hidden;
         }
+
+        /* Main Layout Container */
+        .layout-container {
+            width: 100%;
+            min-height: 100vh;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: linear-gradient(180deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            transition: all var(--transition-speed) ease;
+            position: fixed;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            z-index: 1000;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+            .sidebar.collapsed {
+                width: var(--sidebar-collapsed-width);
+            }
+
+        /* Sidebar Header */
+        .sidebar-header {
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .sidebar-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            transition: all var(--transition-speed) ease;
+            margin-bottom: 10px;
+        }
+
+        .sidebar.collapsed .sidebar-logo {
+            width: 35px;
+            height: 35px;
+        }
+
+        .clinic-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: white;
+            white-space: nowrap;
+            opacity: 1;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .clinic-name {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .toggle-btn {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+            .toggle-btn:hover {
+                background: rgba(255, 255, 255, 0.2);
+            }
+
+        /* Sidebar Menu */
+        .sidebar-menu {
+            flex: 1;
+            padding: 20px 0;
+            overflow-y: auto;
+        }
+
+            .sidebar-menu::-webkit-scrollbar {
+                width: 5px;
+            }
+
+            .sidebar-menu::-webkit-scrollbar-track {
+                background: rgba(255, 255, 255, 0.1);
+            }
+
+            .sidebar-menu::-webkit-scrollbar-thumb {
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 3px;
+            }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            position: relative;
+            white-space: nowrap;
+        }
+
+            .menu-item:hover {
+                background: rgba(255, 255, 255, 0.1);
+                color: white;
+                padding-left: 25px;
+            }
+
+            .menu-item.active {
+                background: rgba(255, 255, 255, 0.15);
+                color: white;
+                border-left: 3px solid #4dabf7;
+            }
+
+        .menu-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            margin-right: 15px;
+            flex-shrink: 0;
+        }
+
+        .sidebar.collapsed .menu-icon {
+            margin-right: 0;
+        }
+
+        .menu-text {
+            font-size: 14px;
+            font-weight: 500;
+            transition: opacity var(--transition-speed) ease;
+            opacity: 1;
+        }
+
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        /* Badge in menu */
+        .menu-badge {
+            margin-left: auto;
+            background: #ff6b6b;
+            color: white;
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 10px;
+            min-width: 20px;
+            text-align: center;
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .menu-badge {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .sidebar-menu::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* Tooltip for collapsed sidebar */
+        .sidebar.collapsed .menu-item {
+            position: relative;
+        }
+
+            .sidebar.collapsed .menu-item::after {
+                content: attr(data-tooltip);
+                position: absolute;
+                left: calc(100% + 15px);
+                top: 50%;
+                transform: translateY(-50%);
+                background: #333;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                font-size: 12px;
+                white-space: nowrap;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.2s ease;
+                z-index: 1000;
+                pointer-events: none;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            }
+
+            .sidebar.collapsed .menu-item:hover::after {
+                opacity: 1;
+                visibility: visible;
+                left: calc(100% + 10px);
+            }
+
+        /* Sidebar Footer */
+        .sidebar-footer {
+            padding: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .user-info {
+            transition: opacity var(--transition-speed) ease;
+            opacity: 1;
+            overflow: hidden;
+        }
+
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+
+        .user-info h6 {
+            font-size: 14px;
+            margin-bottom: 2px;
+            color: white;
+        }
+
+        .user-info small {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            margin-left: var(--sidebar-width);
+            transition: margin-left var(--transition-speed) ease;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Top Navigation */
+        .top-navbar {
+            padding: 15px 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 100;
+            position: sticky;
+            top: 0;
+        }
+
+        .navbar-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        /* Content Padding */
+        .content-wrapper {
+            flex: 1;
+            padding: 30px;
+        }
+
+        /* Adjust existing dashboard styles */
+        .welcome-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+
+            .stat-card:hover {
+                transform: translateY(-5px);
+            }
+
+        .quick-action-btn {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 10px;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+            .quick-action-btn:hover {
+                transform: translateY(-3px);
+            }
     </style>
 </head>
 <body>
-    <!-- Sidebar Wrapper (FIXED: This is now separate from content) -->
-    <div class="sidebar-wrapper" id="sidebarWrapper">
-        <div class="sidebar">
-            <!-- Logo -->
-            <div class="sidebar-header text-center py-4">
-                <img src="~/img/logo.jpg" alt="Sphinx Cure Medical Clinic Logo" class="sidebar-logo">
-                <h4 class="sidebar-title mt-3 mb-0">Sphinx Cure</h4>
-                <p class="text-muted small">Medical Clinic</p>
+    <div class="layout-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <!-- Sidebar Header with Logo and Toggle -->
+            <div class="sidebar-header">
+                <div class="d-flex align-items-center">
+                    <div class="clinic-name ms-3">Sphinx Cure</div>
+                </div>
+                <button class="toggle-btn" id="sidebarToggle">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
             </div>
 
-                        <!-- Top Navigation Bar -->
-            <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
-                <div class="container-fluid">
-                    <!-- Toggle Button for Sidebar -->
-                    <button class="btn btn-light d-none d-lg-block" id="sidebarToggleDesktop">
-                        <i class="fas fa-bars"></i>
-                    </button>
+            <!-- Sidebar Menu -->
+            <nav class="sidebar-menu">
+                <a href="@Url.Action("Dashboard", "Home")" class="menu-item active" data-tooltip="Dashboard">
+                    <div class="menu-icon">
+                        <i class="fas fa-tachometer-alt"></i>
+                    </div>
+                    <span class="menu-text">Dashboard</span>
+                </a>
 
-                    <div class="navbar-nav ms-auto">
+                <a href="@Url.Action("Index", "Patient")" class="menu-item" data-tooltip="Patients">
+                    <div class="menu-icon">
+                        <i class="fas fa-user-injured"></i>
+                    </div>
+                    <span class="menu-text">Patients</span>
+                    <span class="menu-badge">@ViewBag.PatientCount</span>
+                </a>
+
+                <a href="#" class="menu-item" data-tooltip="Appointments">
+                    <div class="menu-icon">
+                        <i class="fas fa-calendar-check"></i>
+                    </div>
+                    <span class="menu-text">Appointments</span>
+                    <span class="menu-badge">@(ViewBag.TodaysAppointments ?? 0)</span>
+                </a>
+
+                <a href="#" class="menu-item" data-tooltip="Medical Records">
+                    <div class="menu-icon">
+                        <i class="fas fa-file-medical-alt"></i>
+                    </div>
+                    <span class="menu-text">Medical Records</span>
+                </a>
+
+                <a href="#" class="menu-item" data-tooltip="Reports">
+                    <div class="menu-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <span class="menu-text">Reports & Analytics</span>
+                </a>
+
+                <a href="#" class="menu-item" data-tooltip="Settings">
+                    <div class="menu-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <span class="menu-text">Settings</span>
+                </a>
+
+                <a href="#" class="menu-item" data-tooltip="Help">
+                    <div class="menu-icon">
+                        <i class="fas fa-question-circle"></i>
+                    </div>
+                    <span class="menu-text">Help & Support</span>
+                </a>
+            </nav>
+
+            <!-- Sidebar Footer with User Profile -->
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user-md"></i>
+                    </div>
+                    <div class="user-info">
+                        <h6 class="mb-0">Dr. Administrator</h6>
+                        <small class="text-muted">Administrator</small>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <!-- Top Navigation Bar -->
+            <nav class="top-navbar">
+                <div class="container-fluid d-flex align-items-center">
+                    <div class="d-flex align-items-center ms-auto">
                         <!-- Notifications Dropdown -->
-                        <div class="nav-item dropdown">
+                        <div class="dropdown me-3">
                             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
                                 <i class="fas fa-bell me-2"></i>
                                 <span class="badge bg-danger">3</span>
@@ -71,58 +480,19 @@
                                 </a>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </nav>
 
-            <!-- User Profile -->
-            <div class="sidebar-footer mt-auto">
-                <div class="user-profile">
-                    <div class="user-avatar">
-                        <i class="fas fa-user-md"></i>
-                    </div>
-                    <div class="user-info">
-                        <h6 class="mb-0">Welcome, Doctor</h6>
-                        <small class="text-muted">Administrator</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Main Content Area (FIXED: This starts after sidebar) -->
-    <div class="main-content" id="mainContent">
-        <!-- Top Navigation Bar -->
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom py-3">
-            <div class="container-fluid">
-                <div class="navbar-nav ms-auto">
-                    <div class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-bell me-2"></i>
-                            <span class="badge bg-danger">3</span>
-                        </a>
-                        <div class="dropdown-menu dropdown-menu-end">
-                            <h6 class="dropdown-header">Notifications</h6>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-user-plus text-success me-2"></i>
-                                New patient registered
-                            </a>
-                            <a class="dropdown-item" href="#">
-                                <i class="fas fa-calendar-alt text-primary me-2"></i>
-                                Appointment reminder
-                            </a>
-                        </div>
-                    </div>
-                    
-                    <!-- Theme Toggle Button -->
-                        <div class="nav-item">
+                        <!-- Theme Toggle -->
+                        <div class="me-3">
                             <button class="theme-toggle" id="themeToggle" title="Toggle dark/light mode">
                                 <i class="fas fa-moon"></i>
                                 <i class="fas fa-sun"></i>
                             </button>
                         </div>
 
-                    <div class="nav-item ms-3">
+                        <!-- Logo -->
+                        <img src="~/img/logo.jpg" alt="Sphinx Cure Logo" class="navbar-logo me-3">
+
+                        <!-- Logout Button -->
                         <form asp-controller="Account" asp-action="Logout" method="post" class="d-inline">
                             <button type="submit" class="btn btn-outline-danger btn-sm">
                                 <i class="fas fa-sign-out-alt"></i> Logout
@@ -130,251 +500,304 @@
                         </form>
                     </div>
                 </div>
-            </div>
-        </nav>
+            </nav>
 
-        <!-- Dashboard Content -->
-        <main class="container-fluid py-4">
-            <!-- Welcome Banner -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="welcome-banner">
-                        <div class="row align-items-center">
-                            <div class="col-md-8">
-                                <h1 class="mb-2">Welcome to Sphinx Cure Dashboard</h1>
-                                <p class="text-muted mb-0">Manage patients, appointments, and medical records efficiently.</p>
-                            </div>
-                            <div class="col-md-4 text-md-end">
-                                <div class="current-time">
-                                    <i class="fas fa-clock me-2"></i>
-                                    <span id="currentTime">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+            <!-- Dashboard Content (Keep your existing content here) -->
+            <div class="content-wrapper">
+                <!-- Welcome Banner -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="welcome-banner">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <h1 class="mb-2">Welcome to Sphinx Cure</h1>
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Statistics Cards -->
-            <div class="row g-4 mb-4">
-                <div class="col-xl-3 col-md-6">
-                    <div class="stat-card stat-card-primary">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-injured"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>@ViewBag.PatientCount</h3>
-                            <p>Total Patients</p>
-                            <small class="text-success">
-                                <i class="fas fa-arrow-up me-1"></i> 12% increase
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="stat-card stat-card-success">
-                        <div class="stat-icon">
-                            <i class="fas fa-heartbeat"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>@(ViewBag.ActivePatients ?? 0)</h3>
-                            <p>Active Patients</p>
-                            <small class="text-success">
-                                <i class="fas fa-arrow-up me-1"></i> 8% increase
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="stat-card stat-card-info">
-                        <div class="stat-icon">
-                            <i class="fas fa-calendar-check"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>@(ViewBag.TodaysAppointments ?? 0)</h3>
-                            <p>Today's Appointments</p>
-                            <small class="text-warning">
-                                <i class="fas fa-clock me-1"></i> 2 pending
-                            </small>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-xl-3 col-md-6">
-                    <div class="stat-card stat-card-warning">
-                        <div class="stat-icon">
-                            <i class="fas fa-file-medical-alt"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3>@(ViewBag.RecentPatients?.Count ?? 0)</h3>
-                            <p>Recent Additions</p>
-                            <small class="text-info">
-                                Last 7 days
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="row mb-4">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0 pb-0">
-                            <h5 class="mb-0">
-                                <i class="fas fa-bolt text-warning me-2"></i> Quick Actions
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-xl-2 col-md-4 col-sm-6">
-                                    <a href="@Url.Action("Create", "Patient")" class="quick-action-btn">
-                                        <div class="icon-wrapper bg-primary">
-                                            <i class="fas fa-user-plus"></i>
-                                        </div>
-                                        <span>Add Patient</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-md-4 col-sm-6">
-                                    <a href="@Url.Action("Index", "Patient")" class="quick-action-btn">
-                                        <div class="icon-wrapper bg-success">
-                                            <i class="fas fa-list"></i>
-                                        </div>
-                                        <span>View All</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-md-4 col-sm-6">
-                                    <a href="@Url.Action("SearchNames", "Patient")" class="quick-action-btn">
-                                        <div class="icon-wrapper bg-info">
-                                            <i class="fas fa-search"></i>
-                                        </div>
-                                        <span>Search</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-md-4 col-sm-6">
-                                    <a href="#" class="quick-action-btn">
-                                        <div class="icon-wrapper bg-warning">
-                                            <i class="fas fa-calendar-plus"></i>
-                                        </div>
-                                        <span>New Appointment</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-md-4 col-sm-6">
-                                    <a href="#" class="quick-action-btn">
-                                        <div class="icon-wrapper bg-danger">
-                                            <i class="fas fa-file-pdf"></i>
-                                        </div>
-                                        <span>Generate Report</span>
-                                    </a>
-                                </div>
-                                <div class="col-xl-2 col-md-4 col-sm-6">
-                                    <a href="#" class="quick-action-btn">
-                                        <div class="icon-wrapper bg-secondary">
-                                            <i class="fas fa-chart-bar"></i>
-                                        </div>
-                                        <span>Analytics</span>
-                                    </a>
+                                <div class="col-md-4 text-md-end">
+                                    <div class="current-time">
+                                        <i class="fas fa-clock me-2"></i>
+                                        <span id="currentTime">@DateTime.Now.ToString("dddd, MMMM dd, yyyy")</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Recent Patients -->
-            <div class="row">
-                <div class="col-12">
-                    <div class="card border-0 shadow-sm">
-                        <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center">
-                            <h5 class="mb-0">
-                                <i class="fas fa-history text-primary me-2"></i> Recent Patients
-                            </h5>
-                            <a href="@Url.Action("Index", "Patient")" class="btn btn-sm btn-outline-primary">
-                                View All <i class="fas fa-arrow-right ms-1"></i>
-                            </a>
+                <!-- Statistics Cards -->
+                <div class="row g-4 mb-4">
+                    <div class="col-xl-3 col-md-6">
+                        <div class="stat-card stat-card-primary">
+                            <div class="stat-icon">
+                                <i class="fas fa-user-injured"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>@ViewBag.PatientCount</h3>
+                                <p>Total Patients</p>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i> 12% increase
+                                </small>
+                            </div>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover">
-                                    <thead class="table-light">
-                                        <tr>
-                                            <th>Patient Name</th>
-                                            <th>Registration Date</th>
-                                            <th>Status</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @if (ViewBag.RecentPatients != null && ViewBag.RecentPatients.Count > 0)
-                                        {
-                                            @foreach (var patient in ViewBag.RecentPatients)
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="stat-card stat-card-success">
+                            <div class="stat-icon">
+                                <i class="fas fa-heartbeat"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>@(ViewBag.ActivePatients ?? 0)</h3>
+                                <p>Active Patients</p>
+                                <small class="text-success">
+                                    <i class="fas fa-arrow-up me-1"></i> 8% increase
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="stat-card stat-card-info">
+                            <div class="stat-icon">
+                                <i class="fas fa-calendar-check"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>@(ViewBag.TodaysAppointments ?? 0)</h3>
+                                <p>Today's Appointments</p>
+                                <small class="text-warning">
+                                    <i class="fas fa-clock me-1"></i> 2 pending
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xl-3 col-md-6">
+                        <div class="stat-card stat-card-warning">
+                            <div class="stat-icon">
+                                <i class="fas fa-file-medical-alt"></i>
+                            </div>
+                            <div class="stat-content">
+                                <h3>@(ViewBag.RecentPatients?.Count ?? 0)</h3>
+                                <p>Recent Additions</p>
+                                <small class="text-info">
+                                    Last 7 days
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header border-0 pb-0">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-bolt text-warning me-2"></i> Quick Actions
+                                </h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row g-3">
+                                    <div class="col-xl-2 col-md-4 col-sm-6">
+                                        <a href="@Url.Action("Create", "Patient")" class="quick-action-btn">
+                                            <div class="icon-wrapper bg-primary">
+                                                <i class="fas fa-user-plus"></i>
+                                            </div>
+                                            <span>Add Patient</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-xl-2 col-md-4 col-sm-6">
+                                        <a href="@Url.Action("Index", "Patient")" class="quick-action-btn">
+                                            <div class="icon-wrapper bg-success">
+                                                <i class="fas fa-list"></i>
+                                            </div>
+                                            <span>View All</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-xl-2 col-md-4 col-sm-6">
+                                        <a href="@Url.Action("SearchNames", "Patient")" class="quick-action-btn">
+                                            <div class="icon-wrapper bg-info">
+                                                <i class="fas fa-search"></i>
+                                            </div>
+                                            <span>Search</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-xl-2 col-md-4 col-sm-6">
+                                        <a href="#" class="quick-action-btn">
+                                            <div class="icon-wrapper bg-warning">
+                                                <i class="fas fa-calendar-plus"></i>
+                                            </div>
+                                            <span>New Appointment</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-xl-2 col-md-4 col-sm-6">
+                                        <a href="#" class="quick-action-btn">
+                                            <div class="icon-wrapper bg-danger">
+                                                <i class="fas fa-file-pdf"></i>
+                                            </div>
+                                            <span>Generate Report</span>
+                                        </a>
+                                    </div>
+                                    <div class="col-xl-2 col-md-4 col-sm-6">
+                                        <a href="#" class="quick-action-btn">
+                                            <div class="icon-wrapper bg-secondary">
+                                                <i class="fas fa-chart-bar"></i>
+                                            </div>
+                                            <span>Analytics</span>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Patients -->
+                <div class="row">
+                    <div class="col-12">
+                        <div class="card border-0 shadow-sm">
+                            <div class="card-header border-0 d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-history text-primary me-2"></i> Recent Patients
+                                </h5>
+                                <a href="@Url.Action("Index", "Patient")" class="btn btn-sm btn-outline-primary">
+                                    View All <i class="fas fa-arrow-right ms-1"></i>
+                                </a>
+                            </div>
+                            <div class="card-body">
+                                <div class="table-responsive">
+                                    <table class="table table-hover">
+                                        <thead>
+                                            <tr>
+                                                <th>Patient Name</th>
+                                                <th>Registration Date</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @if (ViewBag.RecentPatients != null && ViewBag.RecentPatients.Count > 0)
+                                            {
+                                                @foreach (var patient in ViewBag.RecentPatients)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            <div class="d-flex align-items-center">
+                                                                <div class="patient-avatar me-3">
+                                                                    <i class="fas fa-user"></i>
+                                                                </div>
+                                                                <div>
+                                                                    <strong>@patient.Name</strong>
+                                                                    <div class="text-muted small">ID: @patient.Id</div>
+                                                                </div>
+                                                            </div>
+                                                        </td>
+                                                        <td>
+                                                            <small>@DateTime.Now.AddDays(-ViewBag.RecentPatients.IndexOf(patient)).ToString("MMM dd, yyyy")</small>
+                                                        </td>
+                                                        <td>
+                                                            <span class="badge bg-success">Active</span>
+                                                        </td>
+                                                        <td>
+                                                            <div class="btn-group btn-group-sm">
+                                                                <a href="@Url.Action("Details", "Patient", new { id = patient.Id })" class="btn btn-outline-info" title="View Details">
+                                                                    <i class="fas fa-eye"></i>
+                                                                </a>
+                                                                <a href="@Url.Action("UpdateFile", "Patient", new { id = patient.Id })" class="btn btn-outline-warning" title="Update File">
+                                                                    <i class="fas fa-edit"></i>
+                                                                </a>
+                                                                @if (!string.IsNullOrEmpty(patient.FilePath))
+                                                                {
+                                                                    <a href="@Url.Action("DownloadFile", "Patient", new { id = patient.Id })" class="btn btn-outline-success" title="Download File">
+                                                                        <i class="fas fa-download"></i>
+                                                                    </a>
+                                                                }
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            }
+                                            else
                                             {
                                                 <tr>
-                                                    <td>
-                                                        <div class="d-flex align-items-center">
-                                                            <div class="patient-avatar me-3">
-                                                                <i class="fas fa-user"></i>
-                                                            </div>
-                                                            <div>
-                                                                <strong>@patient.Name</strong>
-                                                                <div class="text-muted small">ID: @patient.Id</div>
-                                                            </div>
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <small>@DateTime.Now.AddDays(-ViewBag.RecentPatients.IndexOf(patient)).ToString("MMM dd, yyyy")</small>
-                                                    </td>
-                                                    <td>
-                                                        <span class="badge bg-success">Active</span>
-                                                    </td>
-                                                    <td>
-                                                        <div class="btn-group btn-group-sm">
-                                                            <a href="@Url.Action("Details", "Patient", new { id = patient.Id })" class="btn btn-outline-info" title="View Details">
-                                                                <i class="fas fa-eye"></i>
+                                                    <td colspan="4" class="text-center py-4">
+                                                        <div class="empty-state">
+                                                            <i class="fas fa-user-injured fa-3x text-muted mb-3"></i>
+                                                            <h5>No patients found</h5>
+                                                            <p class="text-muted">Start by adding your first patient</p>
+                                                            <a href="@Url.Action("Create", "Patient")" class="btn btn-primary">
+                                                                <i class="fas fa-user-plus me-2"></i> Add Patient
                                                             </a>
-                                                            <a href="@Url.Action("UpdateFile", "Patient", new { id = patient.Id })" class="btn btn-outline-warning" title="Update File">
-                                                                <i class="fas fa-edit"></i>
-                                                            </a>
-                                                            @if (!string.IsNullOrEmpty(patient.FilePath))
-                                                            {
-                                                                <a href="@Url.Action("DownloadFile", "Patient", new { id = patient.Id })" class="btn btn-outline-success" title="Download File">
-                                                                    <i class="fas fa-download"></i>
-                                                                </a>
-                                                            }
                                                         </div>
                                                     </td>
                                                 </tr>
                                             }
-                                        }
-                                        else
-                                        {
-                                            <tr>
-                                                <td colspan="4" class="text-center py-4">
-                                                    <div class="empty-state">
-                                                        <i class="fas fa-user-injured fa-3x text-muted mb-3"></i>
-                                                        <h5>No patients found</h5>
-                                                        <p class="text-muted">Start by adding your first patient</p>
-                                                        <a href="@Url.Action("Create", "Patient")" class="btn btn-primary">
-                                                            <i class="fas fa-user-plus me-2"></i> Add Patient
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        }
-                                    </tbody>
-                                </table>
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <!-- Bootstrap JS -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Dashboard JavaScript -->
-    <script src="~/js/dashboard.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            const sidebar = $('#sidebar');
+            const sidebarToggle = $('#sidebarToggle');
+            const toggleIcon = sidebarToggle.find('i');
+
+            // Toggle sidebar on desktop
+            sidebarToggle.click(function() {
+                sidebar.toggleClass('collapsed');
+
+                // Rotate toggle icon
+                if (sidebar.hasClass('collapsed')) {
+                    toggleIcon.removeClass('fa-chevron-left').addClass('fa-chevron-right');
+                } else {
+                    toggleIcon.removeClass('fa-chevron-right').addClass('fa-chevron-left');
+                }
+
+                // Store state in localStorage
+                localStorage.setItem('sidebarCollapsed', sidebar.hasClass('collapsed'));
+            });
+
+            // Load saved sidebar state
+            const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+            if (isCollapsed) {
+                sidebar.addClass('collapsed');
+                toggleIcon.removeClass('fa-chevron-left').addClass('fa-chevron-right');
+            }
+
+            // Update time
+            function updateTime() {
+                const now = new Date();
+                const options = {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                };
+                $('#currentTime').text(now.toLocaleDateString('en-US', options));
+            }
+
+            updateTime();
+            setInterval(updateTime, 60000);
+
+            // Theme toggle functionality
+            $('#themeToggle').click(function() {
+                const currentTheme = $('html').attr('data-theme');
+                const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+                $('html').attr('data-theme', newTheme);
+                localStorage.setItem('theme', newTheme);
+            });
+
+            // Load saved theme
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            $('html').attr('data-theme', savedTheme);
+        });
+    </script>
 </body>
 </html>

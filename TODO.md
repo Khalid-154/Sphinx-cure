@@ -1,11 +1,16 @@
-# TODO: Implement Logout Functionality
+# TODO: Make the password of admin user hashed
 
-- [x] Add Logout action in AccountController.cs
-- [x] Modify _Header.cshtml to conditionally display logout button when authenticated
+## Completed Tasks
+- [x] Analyzed the current admin user seeding in Program.cs
+- [x] Identified that userManager.CreateAsync automatically hashes passwords, but to make it explicit, modify to use PasswordHasher
 
-# TODO: Implement Notification Feature
+## Pending Tasks
+- [ ] Modify Program.cs to explicitly hash the admin password using PasswordHasher
+- [ ] Update TODO.md to reflect completion
 
-- [x] Add notification bell icon with badge in _Header.cshtml at top-right corner
-- [x] Update NotificationHub.cs to include SendNotification method
-- [x] Add SignalR JavaScript library and connection script in _Layout.cshtml
-- [x] Test the notification feature by triggering a notification (added TestNotification action in HomeController)
+## Summary
+The admin user is currently seeded with a plain text password, but ASP.NET Core Identity handles hashing. To explicitly ensure hashing, we'll use PasswordHasher to set the PasswordHash property before creating the user.
+
+## Next Steps
+- Implement the explicit hashing in the seeding code
+- Test the application to ensure login works with the hashed password
