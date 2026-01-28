@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Sphinx_cure_.BLL.Helper;
 using Sphinx_cure_.BLL.ModelVM.Patient;
@@ -22,6 +23,7 @@ namespace Sphinx_cure_PLL.Controllers
 
         }
 
+        [Authorize]
         [HttpGet]
         public async Task<IActionResult> Index()
         {

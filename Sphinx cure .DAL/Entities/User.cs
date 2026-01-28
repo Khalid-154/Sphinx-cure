@@ -15,11 +15,11 @@ namespace Sphinx_cure_.DAL.Entities
 
         public User() { }
 
-        public User(UserRole role, bool isDeleted)
+        public User(UserRole role, bool isDeleted = false)
         {
             Role = role;
             CreatedAt = DateTime.Now;
-            IsDeleted = false;
+            IsDeleted = isDeleted;
         }
 
         public void AssignPatient(Patient patient)

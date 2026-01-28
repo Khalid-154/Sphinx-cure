@@ -6,6 +6,7 @@ using Sphinx_cure_.BLL.Services.Abstractions;
 using Sphinx_cure_.BLL.Services.Implementations;
 using Sphinx_cure_.DAL.Database;
 using Sphinx_cure_.DAL.Entities;
+using Sphinx_cure_.DAL.Enums;
 using Sphinx_cure_.DAL.Repo.Abstractions;
 using Sphinx_cure_.DAL.Repo.Implementations;
 using Sphinx_cure_PLL.Hubs;
@@ -75,6 +76,43 @@ namespace Sphinx_cure_PLL
             });
 
             var app = builder.Build();
+
+            // Seed main admin user
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var userManager = services.GetRequiredService<UserManager<User>>();
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+
+                // Ensure roles exist
+                string[] roles = { "Admin", "Viewer", "Editor" };
+                foreach (var role in roles)
+                {
+                    if (!await roleManager.RoleExistsAsync(role))
+                    {
+                        await roleManager.CreateAsync(new IdentityRole(role));
+                    }
+                }
+
+                // Seed main admin user
+                string adminEmail = "admin@sphinx.com";
+                string adminPassword = "yY2004*#";
+                var adminUser = await userManager.FindByEmailAsync(adminEmail);
+                if (adminUser == null)
+                {
+                    adminUser = new User(UserRole.Admin)
+                    {
+                        UserName = "Admin",
+                        Email = adminEmail,
+                        EmailConfirmed = true
+                    };
+                    var result = await userManager.CreateAsync(adminUser, adminPassword);
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(adminUser, "Admin");
+                    }
+                }
+            }
 
             app.MapHub<NotificationHub>("/notificationHub");
 
