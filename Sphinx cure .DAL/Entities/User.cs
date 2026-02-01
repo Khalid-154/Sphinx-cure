@@ -26,5 +26,11 @@ namespace Sphinx_cure_.DAL.Entities
         {
             Patients.Add(patient);
         }
+
+        public void MarkAsDeleted()
+        {
+            IsDeleted = true;
+            DeletedAt = DateTime.Now;
+        }
     }
 }
