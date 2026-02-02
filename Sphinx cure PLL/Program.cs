@@ -96,13 +96,13 @@ namespace Sphinx_cure_PLL
 
                 // Seed main admin user
                 string adminEmail = "admin@sphinx.com";
-                string adminPassword = "yY2004*#";
+                string adminPassword = "O_M_5790";
                 var adminUser = await userManager.FindByEmailAsync(adminEmail);
                 if (adminUser == null)
                 {
                     adminUser = new User(UserRole.Admin)
                     {
-                        UserName = "Admin",
+                        UserName = "omnia",
                         Email = adminEmail,
                         EmailConfirmed = true
                     };
