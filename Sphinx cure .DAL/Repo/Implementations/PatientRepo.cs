@@ -7,13 +7,9 @@ using Sphinx_cure_.DAL.Repo.Abstractions;
 
 namespace Sphinx_cure_.DAL.Repo.Implementations
 {
-    public class PatientRepo : IPatientRepo
+    public class PatientRepo(SphinxCureDbContext context) : IPatientRepo
     {
-        private readonly SphinxCureDbContext _context;
-        public PatientRepo(SphinxCureDbContext context)
-        {
-            _context = context;
-        }
+        private readonly SphinxCureDbContext _context = context;
 
         public async Task<List<Patient>> GetAllAsync()
         {

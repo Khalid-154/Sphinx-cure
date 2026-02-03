@@ -1,16 +1,14 @@
-﻿
-
-using System.ComponentModel.DataAnnotations.Schema;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Sphinx_cure_.DAL.Entities
 {
     public class Patient
     {
         public int Id { get; private set; }
-        public string Name { get; private set; }
+        public string Name { get; private set; } = string.Empty;
         public DateTime CreatedAt { get; private set; }
         public DateTime? UpdatedAt { get; private set; }
-        public string FilePath { get; set; }
+        public string FilePath { get; set; } = string.Empty;
         public bool IsDeleted { get; private set; }
         public DateTime? DeletedAt { get; private set; }
 
@@ -18,7 +16,6 @@ namespace Sphinx_cure_.DAL.Entities
 
         [ForeignKey(nameof(UserId))]
         public virtual User? User { get; private set; }
-
 
         public Patient() { }
 
@@ -36,7 +33,6 @@ namespace Sphinx_cure_.DAL.Entities
             FilePath = newFilePath;
             UpdatedAt = DateTime.Now;
         }
-
 
         public void Delete()
         {

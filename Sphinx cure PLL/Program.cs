@@ -85,7 +85,7 @@ namespace Sphinx_cure_PLL
                 var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
 
                 // Ensure roles exist
-                string[] roles = { "Admin", "Viewer", "Editor" };
+                string[] roles = ["Admin", "Viewer", "Editor"];
                 foreach (var role in roles)
                 {
                     if (!await roleManager.RoleExistsAsync(role))

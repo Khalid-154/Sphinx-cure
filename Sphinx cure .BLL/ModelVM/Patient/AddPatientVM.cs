@@ -12,7 +12,7 @@ namespace Sphinx_cure_.BLL.ModelVM.Patient
         [Required, MaxLength(100)]
         public string Name { get; set; } = string.Empty;
 
-        public IFormFile File { get; set; }
+        public IFormFile? File { get; set; }
 
         //public string FilePath { get; set; }
 

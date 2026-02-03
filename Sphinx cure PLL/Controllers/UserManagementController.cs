@@ -9,16 +9,10 @@ using System.Security.Claims;
 namespace Sphinx_cure_PLL.Controllers
 {
     [Authorize()]
-    public class UserManagementController : Controller
+    public class UserManagementController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager) : Controller
     {
-        private readonly UserManager<User> _userManager;
-        private readonly RoleManager<IdentityRole> _roleManager;
-
-        public UserManagementController(UserManager<User> userManager, RoleManager<IdentityRole> roleManager)
-        {
-            _userManager = userManager;
-            _roleManager = roleManager;
-        }
+        private readonly UserManager<User> _userManager = userManager;
+        private readonly RoleManager<IdentityRole> _roleManager = roleManager;
 
         [HttpGet]
         public IActionResult Index()
@@ -220,10 +214,12 @@ namespace Sphinx_cure_PLL.Controllers
                 return RedirectToAction("Index");
             }
 
+            // Fix for CS9035: Set required 'Password' property in CreateUserVM initializer in EditUser GET action
             var model = new CreateUserVM
             {
-                UserName = targetUser.UserName,
-                Role = targetUser.Role.ToString()
+                UserName = targetUser.UserName ?? string.Empty, // Ensure non-null assignment
+                Role = targetUser.Role.ToString(),
+                Password = string.Empty // Set to empty string since password is not edited here
             };
 
             ViewBag.Roles = new[] { "Admin", "Viewer", "Editor" };

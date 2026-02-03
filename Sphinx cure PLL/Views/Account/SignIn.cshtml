@@ -34,7 +34,9 @@
                         </div>
                     }
 
-                    <form asp-controller="Account" asp-action="SignIn" method="post">
+                    <form asp-controller="Account"
+                          asp-action="SignIn"
+                          method="post">
                         @Html.AntiForgeryToken()
 
                         <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>

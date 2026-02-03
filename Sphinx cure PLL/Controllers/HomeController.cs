@@ -1,5 +1,3 @@
-using System.Diagnostics;
-using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -8,23 +6,17 @@ using Sphinx_cure_.BLL.Services.Abstractions;
 using Sphinx_cure_.DAL.Entities;
 using Sphinx_cure_PLL.Hubs;
 using Sphinx_cure_PLL.Models;
+using System.Diagnostics;
+using System.Security.Claims;
 
 namespace Sphinx_cure_PLL.Controllers
 {
-    public class HomeController : Controller
+    public class HomeController(ILogger<HomeController> logger, IPatientService patientService, IHubContext<NotificationHub> hubContext, UserManager<User> userManager) : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly IPatientService _patientService;
-        private readonly IHubContext<NotificationHub> _hubContext;
-        private readonly UserManager<User> _userManager;
-
-        public HomeController(ILogger<HomeController> logger, IPatientService patientService, IHubContext<NotificationHub> hubContext, UserManager<User> userManager)
-        {
-            _logger = logger;
-            _patientService = patientService;
-            _hubContext = hubContext;
-            _userManager = userManager;
-        }
+        private readonly ILogger<HomeController> _logger = logger;
+        private readonly IPatientService _patientService = patientService;
+        private readonly IHubContext<NotificationHub> _hubContext = hubContext;
+        private readonly UserManager<User> _userManager = userManager;
 
         public IActionResult Index()
         {

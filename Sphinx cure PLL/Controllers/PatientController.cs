@@ -1,27 +1,16 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
-using Sphinx_cure_.BLL.Helper;
+using Microsoft.AspNetCore.SignalR;
 using Sphinx_cure_.BLL.ModelVM.Patient;
 using Sphinx_cure_.BLL.Services.Abstractions;
-using Sphinx_cure_.DAL.Entities;
 using Sphinx_cure_PLL.Hubs;
 
 namespace Sphinx_cure_PLL.Controllers
 {
-    public class PatientController : Controller
+    public class PatientController(IPatientService patientService, IHubContext<NotificationHub> hubContext) : Controller
     {
-        private readonly IPatientService _patientService;
-        private readonly IHubContext<NotificationHub> _hubContext;
-
-
-        public PatientController(IPatientService patientService, IHubContext<NotificationHub> hubContext)
-        {
-            _patientService = patientService;
-            _hubContext = hubContext;
-
-        }
+        private readonly IPatientService _patientService = patientService;
+        private readonly IHubContext<NotificationHub> _hubContext = hubContext;
 
         [Authorize]
         [HttpGet]
@@ -39,7 +28,7 @@ namespace Sphinx_cure_PLL.Controllers
         [HttpGet]
         public async Task<IActionResult> Details(int id)
         {
-            var (status, message, patient) = await _patientService.GetPatientByIdAsync(id);
+            var (status, _, patient) = await _patientService.GetPatientByIdAsync(id);
             if (!status) return RedirectToAction("Index");
             return View(patient);
         }
@@ -124,23 +113,10 @@ namespace Sphinx_cure_PLL.Controllers
             return Ok(message);
         }
 
-
-        // GET: /Patients/Search?name=Ali
-        //public async Task<IActionResult> Search(string name)
-        //{
-        //    var (status, message, patients) = await _patientService.SearchPatientsByNameAsync(name);
-        //    if (!status)
-        //    {
-        //        TempData["Error"] = message;
-        //        return RedirectToAction(nameof(Index));
-        //    }
-        //    return View("Index", patients);
-        //}
-
         [HttpGet]
         public async Task<IActionResult> DownloadFile(int id)
         {
-            var (status, message, patient) = await _patientService.GetPatientByIdAsync(id);
+            var (status, _, patient) = await _patientService.GetPatientByIdAsync(id);
             if (!status || patient == null || string.IsNullOrEmpty(patient.FilePath))
                 return NotFound();
 
@@ -149,8 +125,9 @@ namespace Sphinx_cure_PLL.Controllers
             if (!System.IO.File.Exists(filePath))
                 return NotFound();
 
-            var memory = new MemoryStream();
-            using (var stream = new FileStream(filePath, FileMode.Open))
+            MemoryStream memory = new();
+            FileStream fileStream = new(filePath, FileMode.Open);
+            using (FileStream stream = fileStream)
             {
                 await stream.CopyToAsync(memory);
             }
@@ -163,7 +140,7 @@ namespace Sphinx_cure_PLL.Controllers
         [HttpGet]
         public async Task<IActionResult> ViewFile(int id)
         {
-            var (status, message, patient) = await _patientService.GetPatientByIdAsync(id);
+            var (status, _, patient) = await _patientService.GetPatientByIdAsync(id);
             if (!status || patient == null || string.IsNullOrEmpty(patient.FilePath))
                 return NotFound();
 
@@ -194,7 +171,7 @@ namespace Sphinx_cure_PLL.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPatientTable()
         {
-            var (status, message, patients) = await _patientService.GetAllPatientsAsync();
+            var (status, _, patients) = await _patientService.GetAllPatientsAsync();
             if (!status)
                 return PartialView("_PatientTable", new List<PatientDTO>());
 
@@ -214,11 +191,11 @@ namespace Sphinx_cure_PLL.Controllers
             return Json(patients.Select(p => p.Name).ToList());
         }
 
-        // بترجع جدول مريض واحد أو أكتر
+
         [HttpGet]
         public async Task<IActionResult> Search(string name)
         {
-            var (status, message, patients) = await _patientService.SearchPatientsByNameAsync(name);
+            var (status, _, patients) = await _patientService.SearchPatientsByNameAsync(name);
 
             if (!status || patients == null || patients.Count == 0)
                 return PartialView("_PatientTable", new List<PatientDTO>());

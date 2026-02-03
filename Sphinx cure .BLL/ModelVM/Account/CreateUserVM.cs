@@ -6,14 +6,14 @@ namespace Sphinx_cure_.BLL.ModelVM.Account
     {
         [Required]
         [Display(Name = "Username")]
-        public string UserName { get; set; }
+        public required string UserName { get; set; }
 
         [Required]
         [DataType(DataType.Password)]
-        public string Password { get; set; }
+        public required string Password { get; set; }
 
         [Required]
         [Display(Name = "Role")]
-        public string Role { get; set; }
+        public required string Role { get; set; }
     }
 }
